@@ -9,6 +9,7 @@ export const BROKER_LOGO_KEYS: ReadonlySet<string> = new Set([
   "binancep2p",
   "bitgetp2p",
   "bitsoalpha",
+  "bullbitcoin",
   "buenbit",
   "bybit",
   "bybitp2p",

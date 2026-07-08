@@ -4,6 +4,7 @@ const NAMES: Record<string, string> = {
   ripio: "Ripio",
   satoshitango: "SatoshiTango",
   universalcoins: "Universal Coins",
+  bullbitcoin: "Bull Bitcoin",
   decrypto: "Decrypto",
   letsbit: "Letsbit",
   fiwind: "Fiwind",

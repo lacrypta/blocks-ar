@@ -1,13 +1,81 @@
-/**
- * Curated dataset of Argentine exchanges/wallets and their Bitcoin support.
- *
- * ⚠️ IMPORTANT: Lightning / Lightning Address support changes frequently and
- * there is no API for it. These values are a best-effort seed and MUST be
- * verified against each platform before relying on them. The UI shows a
- * "datos a verificar" disclaimer accordingly.
- */
+import rawArExchanges from "./arExchanges.json";
 
 export type Support = boolean;
+export type BitcoinerSupport = boolean;
+
+export const BITCOINER_FEATURE_KEYS = [
+  "onchain",
+  "lightning",
+  "lightningAddressOut",
+  "lightningAddressIn",
+  "api",
+  "selfCustody",
+  "nonMandatoryKyc",
+  "openSourceContributions",
+  "bitcoinOnly",
+  "noCryptoOnlyStablecoins",
+] as const;
+
+export type BitcoinerFeatureKey = (typeof BITCOINER_FEATURE_KEYS)[number];
+
+export const BITCOINER_FEATURE_DETAILS: Record<
+  BitcoinerFeatureKey,
+  { description: string; label: string }
+> = {
+  onchain: {
+    label: "On-chain",
+    description: "Permite depositar o retirar BTC on-chain.",
+  },
+  lightning: {
+    label: "Lightning",
+    description: "Permite operar BTC por Lightning Network.",
+  },
+  lightningAddressOut: {
+    label: "LN Address out",
+    description: "Puede enviar pagos a una Lightning Address externa.",
+  },
+  lightningAddressIn: {
+    label: "LN Address in",
+    description: "Puede recibir con su propia Lightning Address.",
+  },
+  api: {
+    label: "API",
+    description: "Ofrece una API pública o documentada para integraciones.",
+  },
+  selfCustody: {
+    label: "Self-custody",
+    description: "Prioriza flujos no custodiales o de autocustodia.",
+  },
+  nonMandatoryKyc: {
+    label: "KYC no obligatorio",
+    description: "Permite operar algún flujo útil sin KYC obligatorio.",
+  },
+  openSourceContributions: {
+    label: "Open source",
+    description: "Contribuye de forma visible a Bitcoin o software abierto.",
+  },
+  bitcoinOnly: {
+    label: "Bitcoin only",
+    description: "El producto se enfoca exclusivamente en Bitcoin.",
+  },
+  noCryptoOnlyStablecoins: {
+    label: "Sin altcoins",
+    description: "No promueve altcoins; a lo sumo suma stablecoins.",
+  },
+};
+
+export interface BitcoinerLevel {
+  onchain: BitcoinerSupport;
+  lightning: BitcoinerSupport;
+  lightningAddressOut: BitcoinerSupport;
+  lightningAddressIn: BitcoinerSupport;
+  api: BitcoinerSupport;
+  selfCustody: BitcoinerSupport;
+  nonMandatoryKyc: BitcoinerSupport;
+  openSourceContributions: BitcoinerSupport;
+  bitcoinOnly: BitcoinerSupport;
+  noCryptoOnlyStablecoins: BitcoinerSupport;
+}
 
 export interface ArExchange {
   key: string;
@@ -17,101 +85,43 @@ export interface ArExchange {
   custodial: boolean;
   btcOnchain: Support;
   lightning: Support;
-  /** Supports receiving to a Lightning Address (user@domain). */
-  lightningAddress: Support;
+  /** Supports paying a third-party Lightning Address (user@domain). */
+  lightningAddressOut: Support;
+  /** Supports owning/receiving to a Lightning Address. */
+  lightningAddressIn: Support;
+  bitcoiner: BitcoinerLevel;
   /** Matching CriptoYa broker key, if it publishes BTC/ARS prices. */
   criptoyaKey?: string;
   notes?: string;
 }
 
-export const AR_EXCHANGES: ArExchange[] = [
-  {
-    key: "lemon",
-    name: "Lemon",
-    url: "https://www.lemon.me",
-    custodial: true,
-    btcOnchain: true,
-    lightning: true,
-    lightningAddress: false,
-    criptoyaKey: "lemoncash",
-  },
-  {
-    key: "belo",
-    name: "Belo",
-    url: "https://www.belo.app",
-    custodial: true,
-    btcOnchain: true,
-    lightning: true,
-    lightningAddress: false,
-    criptoyaKey: "belo",
-  },
-  {
-    key: "ripio",
-    name: "Ripio",
-    url: "https://www.ripio.com",
-    custodial: true,
-    btcOnchain: true,
-    lightning: true,
-    lightningAddress: true,
-    criptoyaKey: "ripio",
-  },
-  {
-    key: "buenbit",
-    name: "Buenbit",
-    url: "https://www.buenbit.com",
-    custodial: true,
-    btcOnchain: true,
-    lightning: false,
-    lightningAddress: false,
-    criptoyaKey: "buenbit",
-  },
-  {
-    key: "satoshitango",
-    name: "SatoshiTango",
-    url: "https://www.satoshitango.com",
-    custodial: true,
-    btcOnchain: true,
-    lightning: true,
-    lightningAddress: false,
-    criptoyaKey: "satoshitango",
-  },
-  {
-    key: "fiwind",
-    name: "Fiwind",
-    url: "https://fiwind.io",
-    custodial: true,
-    btcOnchain: true,
-    lightning: false,
-    lightningAddress: false,
-    criptoyaKey: "fiwind",
-  },
-  {
-    key: "letsbit",
-    name: "Letsbit",
-    url: "https://letsbit.io",
-    custodial: true,
-    btcOnchain: true,
-    lightning: false,
-    lightningAddress: false,
-    criptoyaKey: "letsbit",
-  },
-  {
-    key: "tiendacrypto",
-    name: "Tienda Crypto",
-    url: "https://tiendacrypto.com",
-    custodial: true,
-    btcOnchain: true,
-    lightning: false,
-    lightningAddress: false,
-    criptoyaKey: "tiendacrypto",
-  },
-  {
-    key: "prex",
-    name: "Prex",
-    url: "https://prexcard.com",
-    custodial: true,
-    btcOnchain: true,
-    lightning: false,
-    lightningAddress: false,
-  },
-];
+export const AR_EXCHANGES_GITHUB_EDIT_URL =
+  "https://github.com/lacrypta/blocks-ar/edit/main/src/lib/data/arExchanges.json";
+
+/**
+ * Rank exchanges by Bitcoin/Lightning support depth.
+ * We favor richer Lightning support over plain on-chain support:
+ * BTC on-chain < Lightning < Lightning Address.
+ */
+export function exchangeSupportRank(exchange: ArExchange): number {
+  return (
+    Number(exchange.btcOnchain) +
+    Number(exchange.lightning) * 2 +
+    Number(exchange.lightningAddressIn) * 4
+  );
+}
+
+export function bitcoinerLevel(exchange: ArExchange): number {
+  return BITCOINER_FEATURE_KEYS.reduce(
+    (score, key) => score + Number(exchange.bitcoiner[key]),
+    0,
+  );
+}
+
+export function bitcoinerFeatures(exchange: ArExchange): string[] {
+  return BITCOINER_FEATURE_KEYS.filter((key) => exchange.bitcoiner[key]).map(
+    (key) => BITCOINER_FEATURE_DETAILS[key].label,
+  );
+}
+
+export const AR_EXCHANGES: ArExchange[] = rawArExchanges as ArExchange[];

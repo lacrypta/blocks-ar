@@ -2,14 +2,19 @@
 
 import { useEffect } from "react";
 import { EXCHANGES } from "@/lib/ws/exchanges";
-import type { ExchangeConfig } from "@/lib/ws/types";
+import type {
+  ExchangeConfig,
+  PollExchangeConfig,
+  WsExchangeConfig,
+} from "@/lib/ws/types";
 import { useExchangeStore } from "@/store/useExchangeStore";
 
 const STALE_MS = 30_000;
 const PING_MS = 20_000;
 const MAX_BACKOFF_MS = 15_000;
+const DEFAULT_POLL_MS = 30_000;
 
-function connect(cfg: ExchangeConfig, signal: AbortSignal) {
+function connectWs(cfg: WsExchangeConfig, signal: AbortSignal) {
   const { setTick, setStatus } = useExchangeStore.getState();
   let ws: WebSocket | null = null;
   let attempt = 0;
@@ -97,6 +102,48 @@ function connect(cfg: ExchangeConfig, signal: AbortSignal) {
       ws.close();
     }
   };
+}
+
+function connectPoll(cfg: PollExchangeConfig, signal: AbortSignal) {
+  const { setTick, setStatus } = useExchangeStore.getState();
+  const pollMs = cfg.pollMs ?? DEFAULT_POLL_MS;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let stopped = false;
+
+  const schedule = () => {
+    if (signal.aborted || stopped) return;
+    timer = setTimeout(run, pollMs);
+  };
+
+  const run = async () => {
+    if (signal.aborted || stopped) return;
+    try {
+      const tick = await cfg.poll(signal);
+      if (signal.aborted || stopped) return;
+      setTick(cfg.id, tick, Date.now());
+    } catch {
+      if (signal.aborted || stopped) return;
+      setStatus(cfg.id, "offline");
+    } finally {
+      schedule();
+    }
+  };
+
+  setStatus(cfg.id, "connecting");
+  void run();
+
+  return () => {
+    stopped = true;
+    if (timer) clearTimeout(timer);
+  };
+}
+
+function connect(cfg: ExchangeConfig, signal: AbortSignal) {
+  if (cfg.transport === "poll") {
+    return connectPoll(cfg, signal);
+  }
+
+  return connectWs(cfg, signal);
 }
 
 /** Opens all exchange sockets once and streams ticks into the store. */

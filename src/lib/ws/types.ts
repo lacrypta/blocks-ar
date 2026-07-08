@@ -3,7 +3,8 @@ export type ExchangeId =
   | "bitstamp"
   | "kraken"
   | "coinbase"
-  | "okx";
+  | "okx"
+  | "bullbitcoin";
 
 export type FeedStatus = "connecting" | "online" | "offline";
 
@@ -14,11 +15,15 @@ export interface ExchangeTick {
   changePct?: number;
 }
 
-export interface ExchangeConfig {
+interface ExchangeConfigBase {
   id: ExchangeId;
   name: string;
   /** Fiat/quote label shown in the UI. */
   quote: string;
+}
+
+export interface WsExchangeConfig extends ExchangeConfigBase {
+  transport: "ws";
   wsUrl: string;
   /** Message(s) to send on open to subscribe. */
   subscribe: (send: (data: unknown) => void) => void;
@@ -27,3 +32,13 @@ export interface ExchangeConfig {
   /** Optional keep-alive message sent on an interval. */
   ping?: (send: (data: unknown) => void) => void;
 }
+
+export interface PollExchangeConfig extends ExchangeConfigBase {
+  transport: "poll";
+  /** Poll the exchange's public API for the latest BTC price. */
+  poll: (signal: AbortSignal) => Promise<ExchangeTick>;
+  /** Poll interval in milliseconds. */
+  pollMs?: number;
+}
+
+export type ExchangeConfig = WsExchangeConfig | PollExchangeConfig;

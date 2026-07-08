@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { OnlineIndicator } from "./OnlineIndicator";
 import { BrandLogo } from "./BrandLogo";
 import { WidgetEditButton } from "@/components/widgets/WidgetEditButton";
 
@@ -34,7 +33,6 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2.5">
-          <OnlineIndicator />
           <WidgetEditButton />
           <ThemeToggle />
         </div>
