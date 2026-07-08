@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
+/* Dark mode driven by a `.dark` class on <html> (next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base surfaces */
+  --bg: #f5f8fc;
+  --surface: #ffffff;
+  --surface-2: #eef3f9;
+  --border: #dde5ef;
+  --fg: #0b1220;
+  --muted: #5a6b80;
+  /* Brand — Argentina + Bitcoin */
+  --primary: #4a90d9;        /* celeste (accent) */
+  --primary-soft: #74acdf;   /* celeste claro */
+  --gold: #f6b40e;           /* sol de mayo */
+  --bitcoin: #f7931a;        /* bitcoin orange (precios/acción) */
+  /* Semantic */
+  --up: #12a150;
+  --down: #e5484d;
+  --online: #12a150;
+  --offline: #94a3b8;
+}
+
+.dark {
+  --bg: #0b1220;
+  --surface: #121b2c;
+  --surface-2: #0f1826;
+  --border: #223047;
+  --fg: #e6edf5;
+  --muted: #93a4b8;
+  --primary: #74acdf;
+  --primary-soft: #8fc0ea;
+  --gold: #f6b40e;
+  --bitcoin: #f7931a;
+  --up: #3fb950;
+  --down: #f85149;
+  --online: #3fb950;
+  --offline: #6b7684;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-gold: var(--gold);
+  --color-bitcoin: var(--bitcoin);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-online: var(--online);
+  --color-offline: var(--offline);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
+  color-scheme: light;
+}
+.dark html,
+html.dark {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Theme toggle: View Transitions (theme-toggle.rdsx.dev technique) ---- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
 }
