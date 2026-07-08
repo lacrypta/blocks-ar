@@ -5,14 +5,25 @@ const num = (v: unknown): number | undefined => {
   return typeof n === "number" && Number.isFinite(n) ? n : undefined;
 };
 
+const BULL_BITCOIN_PRICE_URL = "https://api.bullbitcoin.com/public/price";
+const BULL_BITCOIN_POLL_MS = 30_000;
+
+interface BullBitcoinPriceResponse {
+  result?: {
+    element?: {
+      price?: number;
+      precision?: number;
+    };
+  };
+}
+
 /**
- * Per-exchange WebSocket configs. Each `parse` normalizes the raw payload
- * to `{ price, changePct }`. Four exchanges expose 24h change on the ticker
- * channel; Bitstamp's WS only streams trades (price only) — its 24h change
- * is filled in via a REST poll elsewhere.
+ * Realtime exchange feed configs. Most exchanges stream over WebSocket; Bull
+ * Bitcoin currently exposes a public price API, so we poll it instead.
  */
 export const EXCHANGES: ExchangeConfig[] = [
   {
+    transport: "ws",
     id: "bitfinex",
     name: "Bitfinex",
     quote: "USD",
@@ -30,6 +41,7 @@ export const EXCHANGES: ExchangeConfig[] = [
     },
   },
   {
+    transport: "ws",
     id: "bitstamp",
     name: "Bitstamp",
     quote: "USD",
@@ -44,6 +56,7 @@ export const EXCHANGES: ExchangeConfig[] = [
     },
   },
   {
+    transport: "ws",
     id: "kraken",
     name: "Kraken",
     quote: "USD",
@@ -66,6 +79,7 @@ export const EXCHANGES: ExchangeConfig[] = [
     },
   },
   {
+    transport: "ws",
     id: "coinbase",
     name: "Coinbase",
     quote: "USD",
@@ -92,6 +106,7 @@ export const EXCHANGES: ExchangeConfig[] = [
     },
   },
   {
+    transport: "ws",
     id: "okx",
     name: "OKX",
     quote: "USDT",
@@ -117,6 +132,41 @@ export const EXCHANGES: ExchangeConfig[] = [
       return { price, changePct };
     },
     ping: (send) => send("ping"),
+  },
+  {
+    transport: "poll",
+    id: "bullbitcoin",
+    name: "Bull Bitcoin",
+    quote: "USD",
+    pollMs: BULL_BITCOIN_POLL_MS,
+    poll: async (signal) => {
+      const response = await fetch(BULL_BITCOIN_PRICE_URL, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "getRate",
+          params: {
+            element: { fromCurrency: "BTC", toCurrency: "USD" },
+          },
+        }),
+        signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Bull Bitcoin price request failed: ${response.status}`);
+      }
+
+      const data = (await response.json()) as BullBitcoinPriceResponse;
+      const minorPrice = num(data.result?.element?.price);
+      const precision = num(data.result?.element?.precision) ?? 2;
+      if (minorPrice === undefined) {
+        throw new Error("Bull Bitcoin price response did not include a price");
+      }
+
+      return { price: minorPrice / 10 ** precision };
+    },
   },
 ];
 

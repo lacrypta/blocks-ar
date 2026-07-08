@@ -10,7 +10,7 @@ export function ExchangeFeedGrid() {
   const feeds = useExchangeStore((s) => s.feeds);
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
       {EXCHANGES.map((ex) => {
         const f = feeds[ex.id];
         const online = f.status === "online";

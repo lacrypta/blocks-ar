@@ -100,13 +100,101 @@ interface RawBroker {
   time?: number;
 }
 
+interface BullBitcoinRateResponse {
+  result?: {
+    element?: {
+      price?: number;
+      precision?: number;
+      createdAt?: string;
+    };
+  };
+}
+
+const BULL_BITCOIN_PRICE_URL = "https://api.bullbitcoin.com/public/price";
+
+function parseBullBitcoinRate(
+  response: BullBitcoinRateResponse,
+): { price?: number; time?: number } {
+  const element = response.result?.element;
+  if (typeof element?.price !== "number") return {};
+
+  const precision = typeof element.precision === "number" ? element.precision : 2;
+  const createdAt =
+    typeof element.createdAt === "string"
+      ? Date.parse(element.createdAt)
+      : undefined;
+
+  return {
+    price: element.price / 10 ** precision,
+    time: Number.isFinite(createdAt) ? createdAt : undefined,
+  };
+}
+
+async function fetchBullBitcoinBroker(
+  signal?: AbortSignal,
+): Promise<BrokerQuote | null> {
+  const [sellRes, buyRes] = await Promise.all([
+    fetch(BULL_BITCOIN_PRICE_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "getRate",
+        params: { element: { fromCurrency: "BTC", toCurrency: "ARS" } },
+      }),
+      signal,
+    }),
+    fetch(BULL_BITCOIN_PRICE_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "getRate",
+        params: { element: { fromCurrency: "ARS", toCurrency: "BTC" } },
+      }),
+      signal,
+    }),
+  ]);
+
+  if (!sellRes.ok || !buyRes.ok) return null;
+
+  const sell = parseBullBitcoinRate(
+    (await sellRes.json()) as BullBitcoinRateResponse,
+  );
+  const buy = parseBullBitcoinRate(
+    (await buyRes.json()) as BullBitcoinRateResponse,
+  );
+  const totalBid = sell.price ?? 0;
+  const totalAsk = buy.price ?? 0;
+
+  if (totalAsk <= 0 && totalBid <= 0) return null;
+
+  const spread =
+    totalAsk > 0 && totalBid > 0 ? (totalAsk - totalBid) / totalBid : NaN;
+
+  return {
+    key: "bullbitcoin",
+    totalAsk,
+    totalBid,
+    ask: totalAsk,
+    bid: totalBid,
+    spread,
+    time: Math.max(sell.time ?? 0, buy.time ?? 0, Date.now()),
+  };
+}
+
 export async function fetchBrokers(
   volume = 0.1,
   signal?: AbortSignal,
 ): Promise<BrokerQuote[]> {
-  const res = await fetch(`https://criptoya.com/api/btc/ars/${volume}`, {
-    signal,
-  });
+  const [res, bullBitcoin] = await Promise.all([
+    fetch(`https://criptoya.com/api/btc/ars/${volume}`, {
+      signal,
+    }),
+    fetchBullBitcoinBroker(signal).catch(() => null),
+  ]);
   if (!res.ok) throw new Error(`CriptoYa brokers ${res.status}`);
   const j = (await res.json()) as Record<string, RawBroker>;
 
@@ -131,5 +219,10 @@ export async function fetchBrokers(
       time: v.time ?? Date.now(),
     });
   }
+
+  if (bullBitcoin) {
+    quotes.push(bullBitcoin);
+  }
+
   return quotes;
 }

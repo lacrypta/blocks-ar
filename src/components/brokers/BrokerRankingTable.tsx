@@ -12,6 +12,7 @@ import { Card, CardTitle } from "@/components/ui/Card";
 import { BrokerLogo } from "./BrokerLogo";
 import { IndicatorMenu } from "./IndicatorMenu";
 import { brokerName } from "@/lib/data/brokerNames";
+import { brokerUrl } from "@/lib/data/brokerUrls";
 import { fmtArs, fmtPct, fmtNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { BrokerQuote } from "@/lib/api/criptoya";
@@ -80,22 +81,20 @@ function Column({
 
         {rows.map((r, i) => {
           const best = i === 0;
-          return (
-            <li
-              key={r.key}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-2 py-1.5",
-                best ? "bg-up/10 ring-1 ring-up/30" : "hover:bg-surface-2/50",
-              )}
-            >
+          const name = brokerName(r.key);
+          const url = brokerUrl(r.key);
+          const rowClassName = cn(
+            "flex items-center gap-2 rounded-lg px-2 py-1.5 text-fg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            best ? "bg-up/10 ring-1 ring-up/30" : "hover:bg-surface-2/50",
+          );
+          const rowContent = (
+            <>
               <span className="w-4 shrink-0 text-center text-xs text-muted tabular-nums">
                 {i + 1}
               </span>
               <BrokerLogo brokerKey={r.key} />
               <span className="flex min-w-0 flex-1 items-center gap-2">
-                <span className="truncate text-sm font-medium">
-                  {brokerName(r.key)}
-                </span>
+                <span className="truncate text-sm font-medium">{name}</span>
                 {best && (
                   <span className="shrink-0 rounded bg-up/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-up">
                     Mejor
@@ -118,6 +117,24 @@ function Column({
               <span className="shrink-0 font-mono text-sm font-semibold tabular-nums">
                 {fmtArs(r.price)}
               </span>
+            </>
+          );
+
+          return (
+            <li key={r.key}>
+              {url ? (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Abrir sitio oficial de ${name}`}
+                  className={rowClassName}
+                >
+                  {rowContent}
+                </a>
+              ) : (
+                <div className={rowClassName}>{rowContent}</div>
+              )}
             </li>
           );
         })}
@@ -222,7 +239,8 @@ export function BrokerRankingTable() {
       )}
 
       <p className="mt-3 text-[11px] text-muted">
-        Precios finales con comisiones incluidas · fuente CriptoYa.
+        Precios finales con comisiones incluidas · fuente CriptoYa + Bull
+        Bitcoin.
         {prefs.usdt && " · USDT = precio del BTC en USDT."}
         {prefs.difBitstamp && " · Dif. = premium vs Bitstamp."}
       </p>

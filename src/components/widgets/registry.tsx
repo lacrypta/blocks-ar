@@ -59,7 +59,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
   },
   "exchanges-ar": {
     id: "exchanges-ar",
-    title: "Exchanges argentinos",
+    title: "Top Exchanges (Bitcoiner Index)",
     span: "full",
     render: () => <ArExchangeSupportTable />,
   },
