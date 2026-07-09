@@ -11,8 +11,8 @@ export function WidgetEditButton() {
       type="button"
       onClick={() => setEditMode(!editMode)}
       aria-pressed={editMode}
-      aria-label="Personalizar widgets"
-      title="Personalizar widgets"
+      aria-label={editMode ? "Salir de editar bloques" : "Editar bloques"}
+      title={editMode ? "Salir de editar bloques" : "Editar bloques"}
       className={cn(
         "inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors",
         editMode
@@ -22,7 +22,7 @@ export function WidgetEditButton() {
     >
       <LayoutIcon className="h-4 w-4" />
       <span className="hidden sm:inline">
-        {editMode ? "Listo" : "Personalizar"}
+        {editMode ? "Listo" : "Editar Bloques"}
       </span>
     </button>
   );
