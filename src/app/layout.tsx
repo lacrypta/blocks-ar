@@ -20,6 +20,20 @@ const siteTitle = "Blocks.AR — Sats argentos";
 const siteDescription =
   "Precio del Bitcoin en pesos argentinos en tiempo real: paridad 1 SAT = 1 ARS, brokers, dólares y exchanges con Lightning.";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://blocks.ar";
+const themeIntroBootScript = `
+(() => {
+  try {
+    const system = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const opposite = system === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+
+    root.classList.remove("light", "dark");
+    root.classList.add(opposite);
+    root.style.colorScheme = opposite;
+    localStorage.setItem("theme", opposite);
+  } catch {}
+})();
+`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -61,6 +75,10 @@ export default function RootLayout({
           </main>
           <Footer />
         </Providers>
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: themeIntroBootScript }}
+        />
       </body>
     </html>
   );
