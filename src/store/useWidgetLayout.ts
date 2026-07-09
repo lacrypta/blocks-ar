@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 /** Widget ids in their default order. The registry maps each id to a component. */
 export const DEFAULT_ORDER = [
   "paridad",
+  "precio",
   "dolares",
   "red",
   "brokers",
@@ -48,10 +49,26 @@ function persist() {
 }
 
 function reconcile(storedOrder: string[], storedHidden: string[]) {
-  // Drop unknown ids, append any newly-added widgets at the end.
+  // Drop unknown ids, then merge newly-added widgets into their default slots.
   const filtered = storedOrder.filter((id) => KNOWN.has(id));
-  const appended = DEFAULT_ORDER.filter((id) => !filtered.includes(id));
-  order = [...filtered, ...appended];
+  order = [...filtered];
+
+  for (const id of DEFAULT_ORDER) {
+    if (order.includes(id)) continue;
+
+    const previousDefaultIds = DEFAULT_ORDER.slice(0, DEFAULT_ORDER.indexOf(id));
+    const previousIndex = previousDefaultIds.reduce(
+      (latest, previousId) => Math.max(latest, order.indexOf(previousId)),
+      -1,
+    );
+
+    if (previousIndex >= 0) {
+      order.splice(previousIndex + 1, 0, id);
+    } else {
+      order.unshift(id);
+    }
+  }
+
   hidden = storedHidden.filter((id) => KNOWN.has(id));
 }
 

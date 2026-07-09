@@ -16,10 +16,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteTitle = "Blocks.AR — Sats argentos";
+const siteTitle = "Blocks.AR — Bitcoin y sats en pesos argentinos";
 const siteDescription =
-  "Precio del Bitcoin en pesos argentinos en tiempo real: paridad 1 SAT = 1 ARS, brokers, dólares y exchanges con Lightning.";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://blocks.ar";
+  "Precio de Bitcoin y satoshis en pesos argentinos, con brokers locales, dólar, mempool, Bitstamp y Lightning en tiempo real.";
+const siteUrl = "https://www.blocks.ar";
+const socialImage = {
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: "Blocks.AR muestra el precio de 1 satoshi en pesos argentinos",
+};
 const themeIntroBootScript = `
 (() => {
   try {
@@ -39,6 +45,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: siteTitle,
   description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
   applicationName: "Blocks.AR",
   authors: [{ name: "Agustin Kassis", url: "https://github.com/agustinkassis" }],
   creator: "Agustin Kassis",
@@ -46,14 +55,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteTitle,
     description: siteDescription,
+    url: "/",
     siteName: "Blocks.AR",
     locale: "es_AR",
     type: "website",
+    images: [socialImage],
   },
   twitter: {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
+    images: [socialImage],
   },
 };
 
