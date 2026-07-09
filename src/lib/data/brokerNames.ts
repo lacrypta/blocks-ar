@@ -1,3 +1,5 @@
+import { brokerPresentationAlias } from "./brokerPresentation";
+
 /** Pretty display names for CriptoYa broker keys. Falls back to a capitalized key. */
 const NAMES: Record<string, string> = {
   buenbit: "Buenbit",
@@ -27,10 +29,15 @@ const NAMES: Record<string, string> = {
   kucoinp2p: "KuCoin P2P",
   bitgetp2p: "Bitget P2P",
   mexcp2p: "MEXC P2P",
+  nexo: "Nexo",
   prex: "Prex",
   trubit: "TruBit",
 };
 
 export function brokerName(key: string): string {
-  return NAMES[key] ?? key.charAt(0).toUpperCase() + key.slice(1);
+  return (
+    brokerPresentationAlias(key)?.displayName ??
+    NAMES[key] ??
+    key.charAt(0).toUpperCase() + key.slice(1)
+  );
 }

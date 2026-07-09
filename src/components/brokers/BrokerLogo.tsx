@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { brokerName } from "@/lib/data/brokerNames";
 import { BROKER_LOGO_KEYS } from "@/lib/data/brokerLogos";
+import { brokerDisplayKey } from "@/lib/data/brokerPresentation";
 import { cn } from "@/lib/cn";
 
 /**
@@ -21,7 +22,8 @@ export function BrokerLogo({
 }) {
   const [failed, setFailed] = useState(false);
   const name = brokerName(brokerKey);
-  const showImg = BROKER_LOGO_KEYS.has(brokerKey) && !failed;
+  const displayKey = brokerDisplayKey(brokerKey);
+  const showImg = BROKER_LOGO_KEYS.has(displayKey) && !failed;
 
   return (
     <span
@@ -33,7 +35,7 @@ export function BrokerLogo({
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={`/brokers/${brokerKey}.png`}
+          src={`/brokers/${displayKey}.png`}
           alt=""
           width={22}
           height={22}

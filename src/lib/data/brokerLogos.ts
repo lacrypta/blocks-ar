@@ -22,6 +22,7 @@ export const BROKER_LOGO_KEYS: ReadonlySet<string> = new Set([
   "lemoncash",
   "letsbit",
   "mexcp2p",
+  "nexo",
   "okexp2p",
   "pluscrypto",
   "prex",

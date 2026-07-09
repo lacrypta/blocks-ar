@@ -148,6 +148,7 @@ export function BrokerRankingTable() {
   const { data: dollars } = useDollars();
   const { reference: bitstamp } = useExchangeStats();
   const { prefs, toggle } = useBrokerIndicators();
+  const hasNexoAlias = (data ?? []).some((quote) => quote.key === "buenbit");
 
   const usdtRate = dollars?.cripto?.value;
 
@@ -241,6 +242,7 @@ export function BrokerRankingTable() {
       <p className="mt-3 text-[11px] text-muted">
         Precios finales con comisiones incluidas · fuente CriptoYa + Bull
         Bitcoin.
+        {hasNexoAlias && " · Nexo muestra precios del feed de Buenbit vía CriptoYa."}
         {prefs.usdt && " · USDT = precio del BTC en USDT."}
         {prefs.difBitstamp && " · Dif. = premium vs Bitstamp."}
       </p>

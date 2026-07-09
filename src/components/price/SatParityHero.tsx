@@ -1,22 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import { useBtcArs } from "@/hooks/useBtcArs";
 import { satToArs, SATS_PER_BTC } from "@/lib/calc/satArs";
+import { SatSymbol } from "@/components/icons/SatSymbol";
 import { fmtArs, fmtSatArs, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
-const DEV_SIMULATED_SAT_ARS = 1.56;
-const DEV_SIMULATED_BTC_ARS = DEV_SIMULATED_SAT_ARS * SATS_PER_BTC;
-const SAT_PARITY_CHART_URL = "https://1satoshi1peso.ar/ARS";
-const SHOW_DEV_SIMULATOR = process.env.NODE_ENV !== "production";
+function SatArsDisplay({ value }: { value?: number }) {
+  const formatted = fmtSatArs(value);
+
+  if (formatted === "—") {
+    return <>{formatted}</>;
+  }
+
+  const [whole, fractional = ""] = formatted.split(",");
+  if (fractional.length <= 2) {
+    return <>{formatted}</>;
+  }
+
+  const mainFraction = fractional.slice(0, 2);
+  const extraFraction = fractional.slice(2);
+
+  return (
+    <>
+      <span>{`${whole},${mainFraction}`}</span>
+      <span className="text-[0.65em]">{extraFraction}</span>
+    </>
+  );
+}
 
 export function SatParityHero() {
   const { value: btcArs, bestAsk, isLoading } = useBtcArs();
-  const [useSimulatedParity, setUseSimulatedParity] = useState(false);
-
-  const displayBtcArs = useSimulatedParity ? DEV_SIMULATED_BTC_ARS : btcArs;
-  const displayBestAsk = useSimulatedParity ? undefined : bestAsk;
+  const displayBtcArs = btcArs;
+  const displayBestAsk = bestAsk;
   const satArs =
     displayBtcArs !== undefined ? satToArs(displayBtcArs) : undefined;
   const ratio = satArs ?? 0;
@@ -36,34 +52,6 @@ export function SatParityHero() {
       id="paridad"
       className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary-soft/15 via-surface to-bitcoin/10 p-6 shadow-sm sm:p-8"
     >
-      <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <a
-          href={SAT_PARITY_CHART_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-fg"
-        >
-          <ChartIcon className="h-3.5 w-3.5" />
-          Ver grafico
-        </a>
-
-        {SHOW_DEV_SIMULATOR && (
-          <button
-            type="button"
-            onClick={() => setUseSimulatedParity((value) => !value)}
-            aria-pressed={useSimulatedParity}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-              useSimulatedParity
-                ? "border-bitcoin/40 bg-bitcoin/10 text-bitcoin"
-                : "border-border bg-surface/80 text-muted hover:text-fg",
-            )}
-          >
-            {useSimulatedParity ? "Volver a valor real" : "Simular 1,56 ARS"}
-          </button>
-        )}
-      </div>
-
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
@@ -73,14 +61,21 @@ export function SatParityHero() {
             1 satoshi en pesos
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-sm text-muted">1 SAT =</span>
+            <span className="inline-flex items-center gap-1.5 text-muted">
+              <span className="text-[2rem] font-medium leading-none">1</span>
+              <SatSymbol
+                title="sat"
+                className="h-9 text-black dark:text-white"
+              />
+              <span className="text-sm">=</span>
+            </span>
             <span
               className={cn(
                 "font-mono text-5xl font-extrabold tabular-nums tracking-tight sm:text-6xl",
                 hasReachedFirstPeso ? "text-up" : "text-bitcoin",
               )}
             >
-              {isLoading && satArs === undefined ? "—" : fmtSatArs(satArs)}
+              {isLoading && satArs === undefined ? "—" : <SatArsDisplay value={satArs} />}
             </span>
             <span className="text-lg font-semibold text-muted">ARS</span>
           </div>
@@ -145,25 +140,5 @@ export function SatParityHero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function ChartIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 19V5" />
-      <path d="M4 19H20" />
-      <path d="M7 15L11 11L14 13L19 8" />
-      <path d="M16 8H19V11" />
-    </svg>
   );
 }

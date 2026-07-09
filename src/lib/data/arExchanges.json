@@ -91,9 +91,9 @@
     }
   },
   {
-    "key": "buenbit",
-    "name": "Buenbit",
-    "url": "https://www.buenbit.com",
+    "key": "nexo",
+    "name": "Nexo",
+    "url": "https://www.nexo.com/",
     "custodial": true,
     "btcOnchain": true,
     "lightning": false,

@@ -1,3 +1,5 @@
+import { brokerPresentationAlias } from "./brokerPresentation";
+
 /** Official broker/exchange websites for CriptoYa broker keys. */
 const URLS: Record<string, string> = {
   belo: "https://www.belo.app/",
@@ -19,6 +21,7 @@ const URLS: Record<string, string> = {
   lemoncash: "https://lemon.me/",
   letsbit: "https://letsbit.io/",
   mexcp2p: "https://www.mexc.com/buy-crypto/p2p",
+  nexo: "https://www.nexo.com/",
   okexp2p: "https://www.okx.com/p2p-markets",
   pluscrypto: "https://pluscrypto.com.ar/",
   prex: "https://www.prexcard.com.ar/",
@@ -32,5 +35,5 @@ const URLS: Record<string, string> = {
 };
 
 export function brokerUrl(key: string): string | undefined {
-  return URLS[key];
+  return brokerPresentationAlias(key)?.displayUrl ?? URLS[key];
 }
