@@ -5,7 +5,6 @@ import { useSyncExternalStore } from "react";
 /** Widget ids in their default order. The registry maps each id to a component. */
 export const DEFAULT_ORDER = [
   "paridad",
-  "exchanges-intl",
   "dolares",
   "red",
   "brokers",

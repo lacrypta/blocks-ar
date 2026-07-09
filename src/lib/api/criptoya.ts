@@ -132,9 +132,11 @@ function parseBullBitcoinRate(
 
 async function fetchBullBitcoinBroker(
   signal?: AbortSignal,
+  init?: RequestInit,
 ): Promise<BrokerQuote | null> {
   const [sellRes, buyRes] = await Promise.all([
     fetch(BULL_BITCOIN_PRICE_URL, {
+      ...init,
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -146,6 +148,7 @@ async function fetchBullBitcoinBroker(
       signal,
     }),
     fetch(BULL_BITCOIN_PRICE_URL, {
+      ...init,
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -188,12 +191,14 @@ async function fetchBullBitcoinBroker(
 export async function fetchBrokers(
   volume = 0.1,
   signal?: AbortSignal,
+  init?: RequestInit,
 ): Promise<BrokerQuote[]> {
   const [res, bullBitcoin] = await Promise.all([
     fetch(`https://criptoya.com/api/btc/ars/${volume}`, {
+      ...init,
       signal,
     }),
-    fetchBullBitcoinBroker(signal).catch(() => null),
+    fetchBullBitcoinBroker(signal, init).catch(() => null),
   ]);
   if (!res.ok) throw new Error(`CriptoYa brokers ${res.status}`);
   const j = (await res.json()) as Record<string, RawBroker>;

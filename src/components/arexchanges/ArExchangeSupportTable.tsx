@@ -60,7 +60,7 @@ function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
         {score}/10
       </span>
 
-      <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-72 -translate-x-1/2 rounded-xl border border-border bg-surface p-3 text-left shadow-lg group-hover:block group-focus-within:block">
+      <span className="glass-popover pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-72 -translate-x-1/2 rounded-xl border p-3 text-left group-hover:block group-focus-within:block">
         <span className="block text-[11px] font-semibold text-fg">
           Bitcoiner Level {score}/10
         </span>
@@ -262,7 +262,7 @@ function FeatureRow({
   const feature = BITCOINER_FEATURE_DETAILS[featureKey];
 
   return (
-    <li className="rounded-lg border border-border bg-surface-2/40 p-3">
+    <li className="glass-card-soft rounded-lg border p-3">
       <div className="flex items-start gap-3">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary-soft/20 text-primary">
           <BitcoinerFeatureIcon
@@ -310,7 +310,7 @@ function BitcoinerInfoModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="bitcoiner-level-title"
-        className="w-full max-w-2xl rounded-2xl border border-border bg-surface p-5 shadow-xl"
+        className="glass-popover w-full max-w-2xl rounded-2xl border p-5"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
@@ -407,14 +407,14 @@ export function ArExchangeSupportTable() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Buscar exchange…"
-        className="mb-3 w-full rounded-lg border border-border bg-surface-2/40 px-3 py-1.5 text-sm outline-none focus:border-primary"
+        className="glass-input mb-3 w-full rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-primary"
       />
 
       <div className="mb-2 flex justify-start">
         <button
           type="button"
           onClick={() => setIsBitcoinerModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-fg"
+          className="glass-pill inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-fg"
         >
           <InfoIcon className="h-3.5 w-3.5" />
           Nivel Bitcoiner

@@ -38,7 +38,7 @@ export function IndicatorMenu({
         onClick={() => setOpen((o) => !o)}
         aria-label="Indicadores"
         aria-expanded={open}
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
+        className="glass-pill inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
       >
         <SlidersIcon className="h-4 w-4" />
         Indicadores
@@ -50,13 +50,13 @@ export function IndicatorMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-30 mt-1.5 w-60 rounded-xl border border-border bg-surface p-1.5 shadow-lg">
+        <div className="glass-popover absolute right-0 z-30 mt-1.5 w-60 rounded-xl border p-1.5">
           {ITEMS.map((it) => (
             <button
               key={it.key}
               type="button"
               onClick={() => onToggle(it.key)}
-              className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-surface-2"
+              className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-white/20 dark:hover:bg-white/5"
             >
               <span className="flex flex-col">
                 <span className="text-sm font-medium">{it.label}</span>

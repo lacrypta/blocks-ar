@@ -18,7 +18,7 @@ export function ExchangeFeedGrid() {
         return (
           <div
             key={ex.id}
-            className="rounded-xl border border-border bg-surface p-3"
+            className="glass-card-soft rounded-xl border p-3"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold">{ex.name}</span>

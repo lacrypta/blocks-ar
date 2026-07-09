@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 import { SatParityHero } from "@/components/price/SatParityHero";
-import { ExchangeFeedGrid } from "@/components/exchanges/ExchangeFeedGrid";
-import { PriceUsdPanel } from "@/components/price/PriceUsdPanel";
 import { DollarBlock } from "@/components/dollars/DollarBlock";
 import { NetworkBlock } from "@/components/network/NetworkBlock";
 import { BrokerRankingTable } from "@/components/brokers/BrokerRankingTable";
@@ -14,30 +12,12 @@ export interface WidgetDef {
   render: () => ReactNode;
 }
 
-function ExchangesIntlWidget() {
-  return (
-    <section id="precio" className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-muted">
-        Exchanges internacionales
-      </h2>
-      <ExchangeFeedGrid />
-      <PriceUsdPanel />
-    </section>
-  );
-}
-
 export const WIDGETS: Record<string, WidgetDef> = {
   paridad: {
     id: "paridad",
     title: "1 SAT = X ARS",
     span: "full",
     render: () => <SatParityHero />,
-  },
-  "exchanges-intl": {
-    id: "exchanges-intl",
-    title: "Exchanges internacionales",
-    span: "full",
-    render: () => <ExchangesIntlWidget />,
   },
   dolares: {
     id: "dolares",

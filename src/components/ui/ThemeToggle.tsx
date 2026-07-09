@@ -79,7 +79,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggle}
       aria-label="Cambiar tema"
       className={cn(
-        "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-fg transition-colors hover:bg-surface-2",
+        "glass-pill inline-flex h-9 w-9 items-center justify-center rounded-lg border text-fg transition-colors hover:bg-white/18 dark:hover:bg-white/5",
         className,
       )}
     >

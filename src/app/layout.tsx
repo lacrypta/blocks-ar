@@ -16,10 +16,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteTitle = "Blocks.AR — Sats argentos";
+const siteDescription =
+  "Precio del Bitcoin en pesos argentinos en tiempo real: paridad 1 SAT = 1 ARS, brokers, dólares y exchanges con Lightning.";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://blocks.ar";
+
 export const metadata: Metadata = {
-  title: "Blocks.AR — Sats argentos",
-  description:
-    "Blocks.AR: el precio del Bitcoin en pesos argentinos en tiempo real — dólares (blue, CCL), ranking de brokers, exchanges con Lightning y el tracker 1 SAT = 1 ARS.",
+  metadataBase: new URL(siteUrl),
+  title: siteTitle,
+  description: siteDescription,
+  applicationName: "Blocks.AR",
+  authors: [{ name: "Agustin Kassis", url: "https://github.com/agustinkassis" }],
+  creator: "Agustin Kassis",
+  publisher: "La Crypta",
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    siteName: "Blocks.AR",
+    locale: "es_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({
