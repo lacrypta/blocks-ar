@@ -3,6 +3,10 @@
 import { useRef } from "react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/cn";
+import {
+  getElementCenter,
+  setThemeWithTransition,
+} from "@/lib/themeTransition";
 
 /**
  * Dark/light toggle with the View Transitions circular reveal
@@ -17,59 +21,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   const { setTheme } = useTheme();
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const toggle = async () => {
+  const toggle = () => {
     const isDark = document.documentElement.classList.contains("dark");
     const next = isDark ? "light" : "dark";
 
-    const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => {
-        ready: Promise<void>;
-        finished: Promise<void>;
-      };
-    };
-
-    const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (!doc.startViewTransition || prefersReduced) {
-      setTheme(next);
-      return;
-    }
-
-    // Reveal the new theme from the button's center.
-    const rect = btnRef.current?.getBoundingClientRect();
-    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
-    const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    );
-
-    const transition = doc.startViewTransition(() => setTheme(next));
-    // Prevent unhandled rejections when the transition is interrupted.
-    void transition.finished.catch(() => {});
-
-    try {
-      await transition.ready;
-    } catch {
-      // Transition was skipped/aborted (e.g. rapid toggles) — theme still switches.
-      return;
-    }
-
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${endRadius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration: 480,
-        easing: "ease-in-out",
-        pseudoElement: "::view-transition-new(root)",
-      },
-    );
+    void setThemeWithTransition(setTheme, next, getElementCenter(btnRef.current));
   };
 
   return (
@@ -78,6 +34,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       type="button"
       onClick={toggle}
       aria-label="Cambiar tema"
+      data-theme-toggle
       className={cn(
         "glass-pill inline-flex h-9 w-9 items-center justify-center rounded-lg border text-fg transition-colors hover:bg-white/18 dark:hover:bg-white/5",
         className,
