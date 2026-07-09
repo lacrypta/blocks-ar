@@ -50,7 +50,7 @@ export function SortableWidget({
             {...attributes}
             {...listeners}
             aria-label={`Mover ${def.title}`}
-            className="pointer-events-auto inline-flex cursor-grab items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-fg shadow-sm active:cursor-grabbing"
+            className="glass-pill pointer-events-auto inline-flex cursor-grab items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium text-fg active:cursor-grabbing"
           >
             <GripIcon className="h-3.5 w-3.5 text-muted" />
             {def.title}
@@ -58,7 +58,7 @@ export function SortableWidget({
           <button
             onClick={onHide}
             aria-label={`Ocultar ${def.title}`}
-            className="pointer-events-auto inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-muted shadow-sm hover:text-down"
+            className="glass-pill pointer-events-auto inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium text-muted hover:text-down"
           >
             <EyeOffIcon className="h-3.5 w-3.5" />
             Ocultar

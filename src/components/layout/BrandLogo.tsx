@@ -47,7 +47,7 @@ export function BrandLogo({
 }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-surface-2 p-1.5 ring-1 ring-border">
+      <span className="glass-pill grid h-9 w-9 place-items-center rounded-xl border p-1.5">
         <BrandMark className="h-full w-full" />
       </span>
       <span className="flex flex-col leading-none">

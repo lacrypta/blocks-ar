@@ -14,7 +14,7 @@ function FeeTier({
   tone: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-surface-2/40 p-3 text-center">
+    <div className="glass-card-soft rounded-xl border p-3 text-center">
       <div className="text-[11px] text-muted">{label}</div>
       <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
         {value ?? "—"}
@@ -26,7 +26,7 @@ function FeeTier({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-surface-2/40 p-3">
+    <div className="glass-card-soft rounded-xl border p-3">
       <div className="text-[11px] text-muted">{label}</div>
       <div className="mt-1 font-mono text-lg font-semibold tabular-nums">
         {value}

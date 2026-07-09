@@ -6,16 +6,17 @@ import { satToArs } from "@/lib/calc/satArs";
 import { SatSymbol } from "@/components/icons/SatSymbol";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { BrandLogo } from "./BrandLogo";
+import { MempoolFeeBadge } from "./MempoolFeeBadge";
 import { WidgetEditButton } from "@/components/widgets/WidgetEditButton";
+import { useWidgetLayout } from "@/store/useWidgetLayout";
 
-const NAV = [
-  { href: "#paridad", label: "Paridad" },
-  { href: "#precio", label: "Precio" },
-  { href: "#dolares", label: "Dólares" },
-  { href: "#brokers", label: "Brokers" },
-  { href: "#exchanges", label: "Exchanges" },
-  { href: "#red", label: "Red" },
-];
+const NAV_BY_WIDGET: Record<string, { href: string; label: string }> = {
+  paridad: { href: "#paridad", label: "Paridad" },
+  dolares: { href: "#dolares", label: "Dólares" },
+  red: { href: "#red", label: "Red" },
+  brokers: { href: "#brokers", label: "Brokers" },
+  "exchanges-ar": { href: "#exchanges", label: "Exchanges" },
+};
 
 const HEADER_SAT_ARS = new Intl.NumberFormat("es-AR", {
   minimumFractionDigits: 2,
@@ -24,24 +25,29 @@ const HEADER_SAT_ARS = new Intl.NumberFormat("es-AR", {
 
 export function Header() {
   const { value: btcArs } = useBtcArs();
+  const { order, hidden } = useWidgetLayout();
   const satArs =
     btcArs !== undefined && Number.isFinite(btcArs) ? satToArs(btcArs) : undefined;
   const satArsLabel =
     satArs !== undefined && Number.isFinite(satArs)
       ? HEADER_SAT_ARS.format(satArs)
       : "—";
+  const hiddenSet = new Set(hidden);
+  const navItems = order
+    .filter((id) => NAV_BY_WIDGET[id] && !hiddenSet.has(id))
+    .map((id) => NAV_BY_WIDGET[id]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-white/15 bg-bg/60 backdrop-blur-xl dark:border-white/8">
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6">
         <Link href="/" aria-label="Blocks.AR — inicio">
           <BrandLogo />
         </Link>
 
         <nav className="ml-4 hidden items-center gap-1 md:flex">
-          {NAV.map((item) => (
+          {navItems.map((item) => (
             <a
-              key={item.href}
+              key={`${item.href}-${item.label}`}
               href={item.href}
               className="rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-fg"
             >
@@ -50,20 +56,25 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto hidden items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted sm:inline-flex">
-          <span className="inline-flex items-center gap-1">
-            <span>1</span>
-            <SatSymbol
-              title="sat"
-              className="h-3.5 text-black dark:text-white"
-            />
-            <span>=</span>
-          </span>
-          <span className="font-semibold text-fg">{satArsLabel}</span>
-          <span>ARS</span>
-        </div>
-
-        <div className="flex items-center gap-2.5">
+        <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
+          <MempoolFeeBadge />
+          <a
+            href="https://1satoshi1peso.ar/ARS"
+            aria-label="Abrir 1Satoshi1Peso"
+            title="Ver 1 sat = 1 peso"
+            className="glass-pill inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
+          >
+            <span className="inline-flex items-center gap-1">
+              <span>1</span>
+              <SatSymbol
+                title="sat"
+                className="h-4 text-black dark:text-white"
+              />
+              <span>=</span>
+            </span>
+            <span className="font-semibold text-fg">{satArsLabel}</span>
+            <span>ARS</span>
+          </a>
           <WidgetEditButton />
           <ThemeToggle />
         </div>

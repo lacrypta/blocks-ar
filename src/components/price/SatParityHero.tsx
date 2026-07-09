@@ -50,7 +50,7 @@ export function SatParityHero() {
   return (
     <section
       id="paridad"
-      className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary-soft/15 via-surface to-bitcoin/10 p-6 shadow-sm sm:p-8"
+      className="glass-card relative overflow-hidden rounded-3xl border bg-gradient-to-br from-primary/10 via-white/10 to-bitcoin/12 p-6 sm:p-8"
     >
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>

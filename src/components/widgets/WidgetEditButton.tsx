@@ -14,10 +14,10 @@ export function WidgetEditButton() {
       aria-label={editMode ? "Salir de editar bloques" : "Editar bloques"}
       title={editMode ? "Salir de editar bloques" : "Editar bloques"}
       className={cn(
-        "inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors",
+        "glass-pill hidden h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors md:inline-flex",
         editMode
-          ? "border-bitcoin/40 bg-bitcoin/15 text-bitcoin"
-          : "border-border bg-surface text-muted hover:text-fg",
+          ? "border-bitcoin/35 text-bitcoin"
+          : "text-muted hover:text-fg",
       )}
     >
       <LayoutIcon className="h-4 w-4" />

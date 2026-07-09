@@ -24,10 +24,10 @@ function DollarCard({
   return (
     <div
       className={cn(
-        "rounded-xl border p-3",
+        "glass-card-soft rounded-xl border p-3",
         accent
-          ? "border-bitcoin/40 bg-bitcoin/5"
-          : "border-border bg-surface-2/40",
+          ? "border-bitcoin/35"
+          : "",
       )}
     >
       <div className="flex items-center justify-between">
