@@ -33,29 +33,26 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-4 text-xs text-muted sm:px-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            Blocks.AR · Datos con fines informativos. No es asesoramiento
-            financiero.
-          </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <div className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-muted sm:px-6">
+          Blocks.AR · Created by{" "}
+          <a
+            className="hover:text-fg"
+            href="https://github.com/agustinkassis"
+            target="_blank"
+            rel="noreferrer"
+          >
+            agustinkassis
+          </a>
+          . Powered by{" "}
             <a
               className="hover:text-fg"
-              href="https://github.com/agustinkassis"
+              href="https://www.lacrypta.dev/"
               target="_blank"
               rel="noreferrer"
             >
-              Created by Agustin Kassis
+            La Crypta Dev
             </a>
-            <a
-              className="hover:text-fg"
-              href="https://lacrypta.ar"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Powered by La Crypta
-            </a>
-          </div>
+          .
         </div>
       </div>
     </footer>

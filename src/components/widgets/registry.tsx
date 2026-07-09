@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SatParityHero } from "@/components/price/SatParityHero";
+import { BitstampMarketWidget } from "@/components/price/BitstampMarketWidget";
 import { DollarBlock } from "@/components/dollars/DollarBlock";
 import { NetworkBlock } from "@/components/network/NetworkBlock";
 import { BrokerRankingTable } from "@/components/brokers/BrokerRankingTable";
@@ -18,6 +19,12 @@ export const WIDGETS: Record<string, WidgetDef> = {
     title: "1 SAT = X ARS",
     span: "full",
     render: () => <SatParityHero />,
+  },
+  precio: {
+    id: "precio",
+    title: "Bitstamp BTC/USD",
+    span: "full",
+    render: () => <BitstampMarketWidget />,
   },
   dolares: {
     id: "dolares",
