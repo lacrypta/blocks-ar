@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { IndicatorPrefs } from "@/hooks/useBrokerIndicators";
 import { cn } from "@/lib/cn";
 
@@ -18,22 +19,54 @@ export function IndicatorMenu({
   onToggle: (key: keyof IndicatorPrefs) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  const updatePosition = () => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const width = 240;
+    const margin = 12;
+    setPosition({
+      top: rect.bottom + 8,
+      left: Math.min(
+        Math.max(rect.right - width, margin),
+        window.innerWidth - width - margin,
+      ),
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
+    updatePosition();
     const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (
+        buttonRef.current?.contains(target) ||
+        popoverRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setOpen(false);
     };
+    const onMove = () => updatePosition();
     document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
+    window.addEventListener("resize", onMove);
+    window.addEventListener("scroll", onMove, true);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      window.removeEventListener("resize", onMove);
+      window.removeEventListener("scroll", onMove, true);
+    };
   }, [open]);
 
   const active = Object.values(prefs).filter(Boolean).length;
 
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Indicadores"
@@ -49,8 +82,13 @@ export function IndicatorMenu({
         )}
       </button>
 
-      {open && (
-        <div className="glass-popover absolute right-0 z-30 mt-1.5 w-60 rounded-xl border p-1.5">
+      {open &&
+        createPortal(
+        <div
+          ref={popoverRef}
+          className="glass-popover !fixed z-50 w-60 rounded-xl border p-1.5 shadow-2xl"
+          style={{ top: position.top, left: position.left }}
+        >
           {ITEMS.map((it) => (
             <button
               key={it.key}
@@ -65,9 +103,10 @@ export function IndicatorMenu({
               <Switch on={prefs[it.key]} />
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
-    </div>
+    </>
   );
 }
 

@@ -1,14 +1,19 @@
 import sharp from "sharp";
-import { fetchBrokers } from "@/lib/api/criptoya";
+import { fetchBrokers, fetchDolar } from "@/lib/api/criptoya";
 import { satToArs } from "@/lib/calc/satArs";
 import { median } from "@/lib/calc/stats";
-import { fmtArs, fmtSatArs } from "@/lib/format";
+import { fmtArs, fmtSatArs, fmtUsd } from "@/lib/format";
 
 export const SOCIAL_IMAGE_REVALIDATE = 1800;
 export const socialImageAlt =
   "Blocks.AR — precio de 1 satoshi en pesos argentinos";
 export const socialImageSize = { width: 1200, height: 630 };
 export const socialImageContentType = "image/png";
+const BITSTAMP_TICKER_URL = "https://www.bitstamp.net/api/v2/ticker/btcusd/";
+
+interface RawBitstampTicker {
+  last?: string | number;
+}
 
 function escapeXml(value: string) {
   return value
@@ -35,45 +40,69 @@ function splitSatValue(value?: number) {
   };
 }
 
-async function getSnapshot() {
-  try {
-    const brokers = await fetchBrokers(0.1, undefined, {
-      next: { revalidate: SOCIAL_IMAGE_REVALIDATE },
-    });
-    const mids = brokers
-      .filter((b) => b.totalAsk > 0 && b.totalBid > 0)
-      .map((b) => (b.totalAsk + b.totalBid) / 2);
-    const asks = brokers.map((b) => b.totalAsk).filter((v) => v > 0);
-    const btcArs = median(mids);
-    const bestAsk = asks.length ? Math.min(...asks) : undefined;
+async function fetchBitstampUsd() {
+  const res = await fetch(BITSTAMP_TICKER_URL, {
+    next: { revalidate: SOCIAL_IMAGE_REVALIDATE },
+  });
+  if (!res.ok) throw new Error(`Bitstamp ticker ${res.status}`);
+  const data = (await res.json()) as RawBitstampTicker;
+  const parsed = typeof data.last === "string" ? Number(data.last) : data.last;
 
-    return {
-      bestAsk,
-      btcArs,
-      satArs: btcArs !== undefined ? satToArs(btcArs) : undefined,
-    };
-  } catch {
-    return {
-      bestAsk: undefined,
-      btcArs: undefined,
-      satArs: undefined,
-    };
-  }
+  return typeof parsed === "number" && Number.isFinite(parsed)
+    ? parsed
+    : undefined;
+}
+
+async function getBtcArsSnapshot() {
+  const brokers = await fetchBrokers(0.1, undefined, {
+    next: { revalidate: SOCIAL_IMAGE_REVALIDATE },
+  });
+  const mids = brokers
+    .filter((b) => b.totalAsk > 0 && b.totalBid > 0)
+    .map((b) => (b.totalAsk + b.totalBid) / 2);
+  const btcArs = median(mids);
+
+  return {
+    btcArs,
+    satArs: btcArs !== undefined ? satToArs(btcArs) : undefined,
+  };
+}
+
+async function getSnapshot() {
+  const [btcArsResult, btcUsdResult, dolarResult] = await Promise.allSettled([
+    getBtcArsSnapshot(),
+    fetchBitstampUsd(),
+    fetchDolar(),
+  ]);
+  const btcArsSnapshot =
+    btcArsResult.status === "fulfilled" ? btcArsResult.value : {};
+
+  return {
+    ...btcArsSnapshot,
+    btcUsdBitstamp:
+      btcUsdResult.status === "fulfilled" ? btcUsdResult.value : undefined,
+    dolarBlue:
+      dolarResult.status === "fulfilled"
+        ? dolarResult.value.blue?.value
+        : undefined,
+  };
 }
 
 function buildSvg({
-  bestAsk,
-  btcArs,
+  btcUsdBitstamp,
+  dolarBlue,
   satArs,
 }: {
-  bestAsk?: number;
-  btcArs?: number;
+  btcUsdBitstamp?: number;
+  dolarBlue?: number;
   satArs?: number;
 }) {
   const { main, extra } = splitSatValue(satArs);
   const valueColor = satArs !== undefined && satArs >= 1 ? "#16A34A" : "#F7931A";
-  const btcLabel = escapeXml(btcArs ? fmtArs(btcArs) : "—");
-  const bestAskLabel = escapeXml(bestAsk ? fmtArs(bestAsk) : "—");
+  const btcUsdLabel = escapeXml(
+    btcUsdBitstamp ? fmtUsd(btcUsdBitstamp, true) : "—",
+  );
+  const dolarBlueLabel = escapeXml(dolarBlue ? fmtArs(dolarBlue, true) : "—");
   const mainLabel = escapeXml(main);
   const extraLabel = escapeXml(extra);
 
@@ -111,29 +140,13 @@ function buildSvg({
       <rect x="13" y="9" width="10" height="40" rx="3" fill="#60A5FA"/>
       <rect x="27" y="9" width="18" height="18" rx="5" fill="#C8E4FF"/>
       <rect x="27" y="31" width="18" height="18" rx="5" fill="#FF9F2D"/>
-      <text x="74" y="30" font-size="36" font-weight="800" fill="#08111F" font-family="Arial, Helvetica, sans-serif">
-        Blocks<tspan fill="#F7931A">.AR</tspan>
-      </text>
-      <text x="74" y="53" font-size="18" fill="#5F728C" font-family="Arial, Helvetica, sans-serif">
+      <text x="74" y="40" font-size="34" font-weight="800" fill="#08111F" font-family="Arial, Helvetica, sans-serif">
         Bitcoin en pesos argentinos
       </text>
     </g>
 
     <g transform="translate(52 136)">
       <rect width="1096" height="346" rx="38" fill="white" stroke="#D8E6F5"/>
-
-      <text
-        x="548"
-        y="72"
-        text-anchor="middle"
-        font-size="22"
-        font-weight="700"
-        letter-spacing="2"
-        fill="#5F728C"
-        font-family="Arial, Helvetica, sans-serif"
-      >
-        1 SAT = X ARS
-      </text>
 
       <text
         x="${startX}"
@@ -196,7 +209,7 @@ function buildSvg({
         fill="#5F728C"
         font-family="Arial, Helvetica, sans-serif"
       >
-        1 BTC = <tspan fill="#08111F" font-weight="700">${btcLabel}</tspan> - mejor compra <tspan fill="#08111F" font-weight="700">${bestAskLabel}</tspan>
+        1 BTC = <tspan fill="#08111F" font-weight="700">${btcUsdLabel}</tspan> - Dolar blue <tspan fill="#08111F" font-weight="700">${dolarBlueLabel}</tspan>
       </text>
     </g>
 

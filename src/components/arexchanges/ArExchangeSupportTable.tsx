@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   AR_EXCHANGES,
   AR_EXCHANGES_GITHUB_EDIT_URL,
@@ -31,6 +32,11 @@ function YesNo({ ok }: { ok: boolean }) {
 
 function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
   const score = bitcoinerLevel(exchange);
+  const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState({ left: 0, top: 0 });
+  const triggerRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
+  const tooltipId = `bitcoiner-tooltip-${exchange.key}`;
   const breakdown = BITCOINER_FEATURE_KEYS.map((key) => ({
     description: BITCOINER_FEATURE_DETAILS[key].description,
     enabled: exchange.bitcoiner[key],
@@ -42,11 +48,54 @@ function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
     .filter((item) => !item.enabled)
     .map((item) => item.label);
 
+  const updatePosition = () => {
+    const triggerRect = triggerRef.current?.getBoundingClientRect();
+    if (!triggerRect) return;
+
+    const margin = 12;
+    const width = 288;
+    const height =
+      tooltipRef.current?.getBoundingClientRect().height ?? 240;
+    const belowTop = triggerRect.bottom + 8;
+    const aboveTop = triggerRect.top - height - 8;
+    const fitsBelow = belowTop + height <= window.innerHeight - margin;
+    const top = fitsBelow ? belowTop : Math.max(margin, aboveTop);
+    const centeredLeft = triggerRect.left + triggerRect.width / 2 - width / 2;
+    const left = Math.min(
+      Math.max(centeredLeft, margin),
+      window.innerWidth - width - margin,
+    );
+
+    setPosition({ left, top });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    updatePosition();
+    const frame = requestAnimationFrame(updatePosition);
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
+
   return (
-    <span className="group relative inline-flex">
+    <span
+      ref={triggerRef}
+      className="relative inline-flex"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+    >
       <span
         tabIndex={0}
-        title={`Bitcoiner Level ${score}/10`}
+        aria-describedby={open ? tooltipId : undefined}
         aria-label={`Bitcoiner Level ${score} de 10`}
         className={cn(
           "inline-flex min-w-12 items-center justify-center rounded-full px-2 py-1 text-[11px] font-semibold tabular-nums outline-none ring-offset-2 transition-shadow focus-visible:ring-2 focus-visible:ring-primary",
@@ -60,48 +109,68 @@ function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
         {score}/10
       </span>
 
-      <span className="glass-popover pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-72 -translate-x-1/2 rounded-xl border p-3 text-left group-hover:block group-focus-within:block">
-        <span className="block text-[11px] font-semibold text-fg">
-          Bitcoiner Level {score}/10
-        </span>
-        <span className="mt-1 block text-[11px] text-muted">
-          Suma 1 punto por cada criterio cumplido.
-        </span>
+      {open &&
+        createPortal(
+          <span
+            id={tooltipId}
+            ref={tooltipRef}
+            role="tooltip"
+            className="pointer-events-none fixed z-[100] w-72 text-left"
+            style={{ left: position.left, top: position.top }}
+          >
+            <span
+              className="glass-popover block rounded-xl border p-3 shadow-2xl"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--surface) 94%, transparent)",
+                borderColor:
+                  "color-mix(in srgb, var(--border) 82%, var(--primary) 18%)",
+              }}
+            >
+              <span className="block text-[11px] font-semibold text-fg">
+                Bitcoiner Level {score}/10
+              </span>
+              <span className="mt-1 block text-[11px] text-muted">
+                Suma 1 punto por cada criterio cumplido.
+              </span>
 
-        <span className="mt-2 block text-[11px] text-up">Cumple</span>
-        <span className="mt-1 flex flex-wrap gap-1">
-          {met.length > 0 ? (
-            breakdown
-              .filter((item) => item.enabled)
-              .map((item) => (
-                <FeatureToken
-                  key={item.key}
-                  featureKey={item.key}
-                  tone="positive"
-                />
-              ))
-          ) : (
-            <span className="text-[11px] text-muted">ninguno</span>
-          )}
-        </span>
+              <span className="mt-2 block text-[11px] text-up">Cumple</span>
+              <span className="mt-1 flex flex-wrap gap-1">
+                {met.length > 0 ? (
+                  breakdown
+                    .filter((item) => item.enabled)
+                    .map((item) => (
+                      <FeatureToken
+                        key={item.key}
+                        featureKey={item.key}
+                        tone="positive"
+                      />
+                    ))
+                ) : (
+                  <span className="text-[11px] text-muted">ninguno</span>
+                )}
+              </span>
 
-        <span className="mt-2 block text-[11px] text-muted">Falta</span>
-        <span className="mt-1 flex flex-wrap gap-1">
-          {missing.length > 0 ? (
-            breakdown
-              .filter((item) => !item.enabled)
-              .map((item) => (
-                <FeatureToken
-                  key={item.key}
-                  featureKey={item.key}
-                  tone="muted"
-                />
-              ))
-          ) : (
-            <span className="text-[11px] text-up">nada</span>
-          )}
-        </span>
-      </span>
+              <span className="mt-2 block text-[11px] text-muted">Falta</span>
+              <span className="mt-1 flex flex-wrap gap-1">
+                {missing.length > 0 ? (
+                  breakdown
+                    .filter((item) => !item.enabled)
+                    .map((item) => (
+                      <FeatureToken
+                        key={item.key}
+                        featureKey={item.key}
+                        tone="muted"
+                      />
+                    ))
+                ) : (
+                  <span className="text-[11px] text-up">nada</span>
+                )}
+              </span>
+            </span>
+          </span>,
+          document.body,
+        )}
     </span>
   );
 }

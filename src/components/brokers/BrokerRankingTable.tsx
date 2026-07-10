@@ -8,6 +8,10 @@ import {
   useBrokerIndicators,
   type IndicatorPrefs,
 } from "@/hooks/useBrokerIndicators";
+import {
+  BROKER_LIMIT_OPTIONS,
+  useBrokerRankingSettings,
+} from "@/hooks/useBrokerRankingSettings";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { BrokerLogo } from "./BrokerLogo";
 import { IndicatorMenu } from "./IndicatorMenu";
@@ -49,6 +53,7 @@ function Column({
   prefs,
   dirs,
   side,
+  skeletonCount,
 }: {
   title: string;
   hint: string;
@@ -57,6 +62,7 @@ function Column({
   prefs: IndicatorPrefs;
   dirs: Record<string, Dir>;
   side: "a" | "b";
+  skeletonCount: number;
 }) {
   return (
     <div>
@@ -67,7 +73,7 @@ function Column({
       <ol className="flex flex-col gap-0.5">
         {loading &&
           rows.length === 0 &&
-          Array.from({ length: 24 }).map((_, i) => (
+          Array.from({ length: skeletonCount }).map((_, i) => (
             <li key={i} className="px-2 py-1.5">
               <div className="h-5 w-full animate-pulse rounded bg-surface-2" />
             </li>
@@ -143,12 +149,46 @@ function Column({
   );
 }
 
+function LimitControl({
+  limit,
+  onChange,
+}: {
+  limit: number;
+  onChange: (limit: number) => void;
+}) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-border/60 pt-3 text-[11px] text-muted">
+      <span>Mostrar top</span>
+      <div className="glass-pill inline-flex h-8 items-center overflow-hidden rounded-lg border p-0.5">
+        {BROKER_LIMIT_OPTIONS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => onChange(option)}
+            aria-pressed={limit === option}
+            className={cn(
+              "h-6 rounded-md px-2.5 text-[11px] font-semibold tabular-nums transition-colors",
+              limit === option
+                ? "bg-primary text-white shadow-sm"
+                : "text-muted hover:bg-white/20 hover:text-fg dark:hover:bg-white/5",
+            )}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function BrokerRankingTable() {
   const { data, isLoading, isError } = useBrokers();
   const { data: dollars } = useDollars();
   const { reference: bitstamp } = useExchangeStats();
   const { prefs, toggle } = useBrokerIndicators();
+  const { settings, setLimit } = useBrokerRankingSettings();
   const hasNexoAlias = (data ?? []).some((quote) => quote.key === "buenbit");
+  const limit = settings.limit;
 
   const usdtRate = dollars?.cripto?.value;
 
@@ -203,6 +243,9 @@ export function BrokerRankingTable() {
     return { buy, sell };
   }, [data, usdtRate, bitstamp]);
 
+  const visibleBuy = buy.slice(0, limit);
+  const visibleSell = sell.slice(0, limit);
+
   return (
     <Card>
       <CardTitle
@@ -221,23 +264,27 @@ export function BrokerRankingTable() {
           <Column
             title="Comprar"
             hint="más barato primero ↓"
-            rows={buy}
+            rows={visibleBuy}
             loading={isLoading}
             prefs={prefs}
             dirs={dirs}
             side="a"
+            skeletonCount={limit}
           />
           <Column
             title="Vender"
             hint="mejor pago primero ↓"
-            rows={sell}
+            rows={visibleSell}
             loading={isLoading}
             prefs={prefs}
             dirs={dirs}
             side="b"
+            skeletonCount={limit}
           />
         </div>
       )}
+
+      {!isError && <LimitControl limit={limit} onChange={setLimit} />}
 
       <p className="mt-3 text-[11px] text-muted">
         Precios finales con comisiones incluidas · fuente CriptoYa + Bull
