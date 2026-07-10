@@ -61,6 +61,8 @@ export function Header() {
           <MempoolFeeBadge />
           <a
             href="https://1satoshi1peso.ar/ARS"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="Abrir 1Satoshi1Peso"
             title="Ver 1 sat = 1 peso"
             className="glass-pill inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
