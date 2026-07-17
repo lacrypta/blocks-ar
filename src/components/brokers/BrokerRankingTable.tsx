@@ -15,8 +15,14 @@ import {
 import { Card, CardTitle } from "@/components/ui/Card";
 import { BrokerLogo } from "./BrokerLogo";
 import { IndicatorMenu } from "./IndicatorMenu";
+import {
+  ExchangeDetailDialog,
+  type ExchangeDetailData,
+} from "@/components/exchanges/ExchangeDetailDialog";
 import { brokerName } from "@/lib/data/brokerNames";
 import { brokerUrl } from "@/lib/data/brokerUrls";
+import { AR_EXCHANGES, type ArExchange } from "@/lib/data/arExchanges";
+import { isProxyFeed, resolveBrokerPriceSource } from "@/lib/data/priceSource";
 import { fmtArs, fmtPct, fmtNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { BrokerQuote } from "@/lib/api/criptoya";
@@ -54,6 +60,7 @@ function Column({
   dirs,
   side,
   skeletonCount,
+  onSelect,
 }: {
   title: string;
   hint: string;
@@ -63,6 +70,7 @@ function Column({
   dirs: Record<string, Dir>;
   side: "a" | "b";
   skeletonCount: number;
+  onSelect: (key: string) => void;
 }) {
   return (
     <div>
@@ -88,9 +96,8 @@ function Column({
         {rows.map((r, i) => {
           const best = i === 0;
           const name = brokerName(r.key);
-          const url = brokerUrl(r.key);
           const rowClassName = cn(
-            "flex items-center gap-2 rounded-lg px-2 py-1.5 text-fg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-fg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
             best ? "bg-up/10 ring-1 ring-up/30" : "hover:bg-surface-2/50",
           );
           const rowContent = (
@@ -128,19 +135,15 @@ function Column({
 
           return (
             <li key={r.key}>
-              {url ? (
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Abrir sitio oficial de ${name}`}
-                  className={rowClassName}
-                >
-                  {rowContent}
-                </a>
-              ) : (
-                <div className={rowClassName}>{rowContent}</div>
-              )}
+              <button
+                type="button"
+                onClick={() => onSelect(r.key)}
+                aria-haspopup="dialog"
+                aria-label={`Ver detalle y fuente de precio de ${name}`}
+                className={rowClassName}
+              >
+                {rowContent}
+              </button>
             </li>
           );
         })}
@@ -191,6 +194,40 @@ export function BrokerRankingTable() {
   const limit = settings.limit;
 
   const usdtRate = dollars?.cripto?.value;
+
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const quotesByKey = useMemo(() => {
+    const map = new Map<string, BrokerQuote>();
+    for (const q of data ?? []) map.set(q.key, q);
+    return map;
+  }, [data]);
+
+  // Reverse-map a broker's CriptoYa key to its curated entry (support +
+  // bitcoiner level). Proxy exchanges are skipped so a borrowed feed (e.g.
+  // "buenbit") never mislabels itself as the borrower (Nexo).
+  const curatedByBrokerKey = useMemo(() => {
+    const map = new Map<string, ArExchange>();
+    for (const e of AR_EXCHANGES) {
+      if (isProxyFeed(e.key)) continue;
+      const key = e.key === "bullbitcoin" ? "bullbitcoin" : e.criptoyaKey;
+      if (key) map.set(key, e);
+    }
+    return map;
+  }, []);
+
+  const selectedDetail: ExchangeDetailData | null = useMemo(() => {
+    if (!selectedKey) return null;
+    return {
+      name: brokerName(selectedKey),
+      logoKey: selectedKey,
+      url: brokerUrl(selectedKey),
+      custodial: curatedByBrokerKey.get(selectedKey)?.custodial,
+      source: resolveBrokerPriceSource(selectedKey),
+      quote: quotesByKey.get(selectedKey),
+      exchange: curatedByBrokerKey.get(selectedKey) ?? null,
+    };
+  }, [selectedKey, curatedByBrokerKey, quotesByKey]);
 
   // Sube/baja arrow: compare current data to the previous render's data via the
   // documented "adjust state when a prop changes" pattern (setState during
@@ -270,6 +307,7 @@ export function BrokerRankingTable() {
             dirs={dirs}
             side="a"
             skeletonCount={limit}
+            onSelect={setSelectedKey}
           />
           <Column
             title="Vender"
@@ -280,6 +318,7 @@ export function BrokerRankingTable() {
             dirs={dirs}
             side="b"
             skeletonCount={limit}
+            onSelect={setSelectedKey}
           />
         </div>
       )}
@@ -293,6 +332,11 @@ export function BrokerRankingTable() {
         {prefs.usdt && " · USDT = precio del BTC en USDT."}
         {prefs.difBitstamp && " · Dif. = premium vs Bitstamp."}
       </p>
+
+      <ExchangeDetailDialog
+        data={selectedDetail}
+        onClose={() => setSelectedKey(null)}
+      />
     </Card>
   );
 }
