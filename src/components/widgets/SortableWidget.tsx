@@ -66,7 +66,12 @@ export function SortableWidget({
         </div>
       )}
 
-      <div className={cn(editMode && "pointer-events-none select-none")}>
+      <div
+        className={cn(
+          "h-full [&>*]:h-full",
+          editMode && "pointer-events-none select-none",
+        )}
+      >
         {def.render()}
       </div>
     </div>
