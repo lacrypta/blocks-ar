@@ -23,7 +23,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
   precio: {
     id: "precio",
     title: "Bitstamp BTC/USD",
-    span: "full",
+    span: "half",
     render: () => <BitstampMarketWidget />,
   },
   dolares: {
@@ -35,7 +35,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
   red: {
     id: "red",
     title: "Red Bitcoin",
-    span: "half",
+    span: "full",
     render: () => <NetworkBlock />,
   },
   brokers: {
