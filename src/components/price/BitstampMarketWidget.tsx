@@ -33,9 +33,11 @@ function TrendPill({ label, value }: { label: string; value?: number }) {
 function FearGreedMeter({
   value,
   label,
+  source,
 }: {
   value?: number;
   label?: string;
+  source?: string;
 }) {
   const clamped =
     value !== undefined && Number.isFinite(value)
@@ -71,7 +73,14 @@ function FearGreedMeter({
 
   return (
     <div>
-      <div className="mb-1 text-xs font-semibold text-muted">Fear &amp; Greed</div>
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <span className="text-xs font-semibold text-muted">Fear &amp; Greed</span>
+        {source && (
+          <span className="text-[10px] text-muted">
+            vía <span className="font-semibold text-fg">{source}</span>
+          </span>
+        )}
+      </div>
       <div className="mx-auto max-w-[170px]">
         <svg
           viewBox="0 0 220 132"
@@ -223,6 +232,7 @@ export function BitstampMarketWidget() {
               data?.fearGreed?.classificationEs ??
               data?.fearGreed?.classification
             }
+            source={data?.fearGreed?.source}
           />
         </div>
       </div>
