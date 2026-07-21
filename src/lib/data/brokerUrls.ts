@@ -11,7 +11,7 @@ const URLS: Record<string, string> = {
   buenbit: "https://buenbit.com/",
   bybit: "https://www.bybit.com/",
   bybitp2p: "https://www.bybit.com/p2p/",
-  cocoscrypto: "https://www.cocos.capital/crypto",
+  cocoscrypto: "https://cocos.capital/inversiones/criptomonedas",
   cryptomktpro: "https://www.cryptomkt.com/",
   decrypto: "https://www.decrypto.la/",
   eluter: "https://eluter.com/",
@@ -30,7 +30,7 @@ const URLS: Record<string, string> = {
   satoshitango: "https://www.satoshitango.com/",
   tiendacrypto: "https://tiendacrypto.com/",
   trubit: "https://www.trubit.com/",
-  universalcoins: "https://www.universalcoins.com/",
+  universalcoins: "https://www.universalcoins.net/",
   vitawallet: "https://vitawallet.io/",
 };
 
