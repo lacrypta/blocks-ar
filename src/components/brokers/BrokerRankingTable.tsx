@@ -22,7 +22,8 @@ import {
 import { brokerName } from "@/lib/data/brokerNames";
 import { brokerUrl } from "@/lib/data/brokerUrls";
 import { AR_EXCHANGES, type ArExchange } from "@/lib/data/arExchanges";
-import { isProxyFeed, resolveBrokerPriceSource } from "@/lib/data/priceSource";
+import { isProxyFeed, listBrokerPriceSources } from "@/lib/data/priceSource";
+import { OFFICIAL_PROVIDER_KEYS } from "@/lib/api/official/meta";
 import { fmtArs, fmtPct, fmtNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { BrokerQuote } from "@/lib/api/criptoya";
@@ -194,6 +195,8 @@ export function BrokerRankingTable() {
   const limit = settings.limit;
 
   const usdtRate = dollars?.cripto?.value;
+  // How many rows are served by the exchange's own API rather than the aggregate.
+  const officialCount = `${OFFICIAL_PROVIDER_KEYS.length} exchanges`;
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -223,7 +226,7 @@ export function BrokerRankingTable() {
       logoKey: selectedKey,
       url: brokerUrl(selectedKey),
       custodial: curatedByBrokerKey.get(selectedKey)?.custodial,
-      source: resolveBrokerPriceSource(selectedKey),
+      sources: listBrokerPriceSources(selectedKey),
       quote: quotesByKey.get(selectedKey),
       exchange: curatedByBrokerKey.get(selectedKey) ?? null,
     };
@@ -326,8 +329,8 @@ export function BrokerRankingTable() {
       {!isError && <LimitControl limit={limit} onChange={setLimit} />}
 
       <p className="mt-3 text-[11px] text-muted">
-        Precios finales con comisiones incluidas · fuente CriptoYa + Bull
-        Bitcoin.
+        Precios finales con comisiones incluidas · fuente CriptoYa, con la API
+        oficial del exchange cuando publica una comparable ({officialCount}).
         {hasNexoAlias && " · Nexo muestra precios del feed de Buenbit vía CriptoYa."}
         {prefs.usdt && " · USDT = precio del BTC en USDT."}
         {prefs.difBitstamp && " · Dif. = premium vs Bitstamp."}
