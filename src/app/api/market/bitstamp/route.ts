@@ -4,7 +4,10 @@ export const revalidate = 300;
 
 const BITSTAMP_OHLC_URL =
   "https://www.bitstamp.net/api/v2/ohlc/btcusd/?step=3600&limit=169";
-const FEAR_GREED_URL = "https://api.alternative.me/fng/?limit=1&format=json";
+// CoinMarketCap's public chart endpoint (el mismo que usa coinmarketcap.com/charts).
+// Requiere un rango; pedimos los últimos días y nos quedamos con `historicalValues.now`.
+const CMC_FEAR_GREED_URL =
+  "https://api.coinmarketcap.com/data-api/v3/fear-greed/chart";
 
 interface RawBitstampCandle {
   timestamp?: string;
@@ -22,15 +25,25 @@ interface RawBitstampOhlc {
   };
 }
 
-interface RawFearGreed {
-  data?: Array<{
-    value?: string;
-    value_classification?: string;
-    timestamp?: string;
-    time_until_update?: string;
-  }>;
-  metadata?: {
-    error?: string | null;
+interface RawCmcFearGreedPoint {
+  score?: number;
+  name?: string;
+  timestamp?: string;
+}
+
+interface RawCmcFearGreed {
+  data?: {
+    historicalValues?: {
+      now?: RawCmcFearGreedPoint;
+      yesterday?: RawCmcFearGreedPoint;
+      lastWeek?: RawCmcFearGreedPoint;
+      lastMonth?: RawCmcFearGreedPoint;
+    };
+    dataList?: RawCmcFearGreedPoint[];
+  };
+  status?: {
+    error_code?: string;
+    error_message?: string;
   };
 }
 
@@ -46,17 +59,18 @@ const num = (value: unknown): number | undefined => {
     : undefined;
 };
 
+// CoinMarketCap devuelve "Extreme fear" / "Fear" / "Neutral" / "Greed" / "Extreme greed".
 const translateFearGreed = (classification?: string) => {
-  switch (classification) {
-    case "Extreme Fear":
+  switch (classification?.toLowerCase()) {
+    case "extreme fear":
       return "Miedo extremo";
-    case "Fear":
+    case "fear":
       return "Miedo";
-    case "Neutral":
+    case "neutral":
       return "Neutral";
-    case "Greed":
+    case "greed":
       return "Codicia";
-    case "Extreme Greed":
+    case "extreme greed":
       return "Codicia extrema";
     default:
       return classification;
@@ -93,22 +107,34 @@ async function fetchBitstampBases() {
 }
 
 async function fetchFearGreed() {
-  const res = await fetch(FEAR_GREED_URL, { next: { revalidate } });
-  if (!res.ok) throw new Error(`Fear & Greed ${res.status}`);
-  const data = (await res.json()) as RawFearGreed;
-  const item = data.data?.[0];
-  const value = num(item?.value);
-  const timestamp = num(item?.timestamp);
-  const nextUpdate = num(item?.time_until_update);
+  const end = Math.floor(Date.now() / 1000);
+  const start = end - 60 * 60 * 24 * 7;
+  const url = `${CMC_FEAR_GREED_URL}?start=${start}&end=${end}`;
 
+  const res = await fetch(url, {
+    headers: { accept: "application/json" },
+    next: { revalidate },
+  });
+  if (!res.ok) throw new Error(`CoinMarketCap Fear & Greed ${res.status}`);
+
+  const data = (await res.json()) as RawCmcFearGreed;
+  const historical = data.data?.historicalValues;
+  const list = data.data?.dataList ?? [];
+  const item = historical?.now ?? list[list.length - 1];
+
+  const value = num(item?.score);
+  const timestamp = num(item?.timestamp);
   if (value === undefined) return undefined;
 
   return {
     value,
-    classification: item?.value_classification,
-    classificationEs: translateFearGreed(item?.value_classification),
+    classification: item?.name,
+    classificationEs: translateFearGreed(item?.name),
     timestamp: timestamp !== undefined ? timestamp * 1000 : undefined,
-    nextUpdateInSeconds: nextUpdate,
+    yesterday: num(historical?.yesterday?.score),
+    lastWeek: num(historical?.lastWeek?.score),
+    lastMonth: num(historical?.lastMonth?.score),
+    source: "CoinMarketCap" as const,
   };
 }
 

@@ -15,7 +15,10 @@ export interface BitstampMarketSnapshot {
     classification?: string;
     classificationEs?: string;
     timestamp?: number;
-    nextUpdateInSeconds?: number;
+    yesterday?: number;
+    lastWeek?: number;
+    lastMonth?: number;
+    source?: string;
   };
   updatedAt: number;
 }
