@@ -29,9 +29,12 @@ export interface ExchangeDetailData {
   url?: string;
   /** Custody model — only known for curated exchanges. */
   custodial?: boolean;
-  /** Where the price comes from. */
-  source: PriceSourceInfo;
-  /** Live BTC/ARS quote, if the feed has one. */
+  /**
+   * Available price sources, primary first. Most exchanges have one; a few
+   * (e.g. Fiwind) also expose their own official feed to switch to.
+   */
+  sources: PriceSourceInfo[];
+  /** Live BTC/ARS quote from the primary (shared brokers) feed, if any. */
   quote?: BrokerQuote;
   /** Curated entry, when present, unlocks the support + bitcoiner sections. */
   exchange?: ArExchange | null;
@@ -454,6 +457,146 @@ function SourceSection({
   );
 }
 
+/** Segmented control to pick which provider's quote the dialog shows. */
+function SourceSwitcher({
+  sources,
+  selectedId,
+  onSelect,
+}: {
+  sources: PriceSourceInfo[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Fuente de datos"
+      className="glass-pill mt-2 inline-flex h-8 items-center overflow-hidden rounded-lg border p-0.5"
+    >
+      {sources.map((source) => (
+        <button
+          key={source.id}
+          type="button"
+          onClick={() => onSelect(source.id)}
+          aria-pressed={selectedId === source.id}
+          className={cn(
+            "h-6 rounded-md px-2.5 text-[11px] font-semibold transition-colors",
+            selectedId === source.id
+              ? "bg-primary text-white shadow-sm"
+              : "text-muted hover:bg-white/20 hover:text-fg dark:hover:bg-white/5",
+          )}
+        >
+          {source.shortLabel ?? source.provider}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Live quote + source provenance, with a source switcher when the exchange has
+ * more than one feed. The app always *uses* the official provider, so the
+ * primary source leads and its quote is what the shared brokers feed already
+ * carries; picking the aggregator just reveals the reading kept alongside it.
+ * Keyed by exchange in the parent so the selection resets per exchange.
+ */
+function QuoteSourcePanel({
+  sources,
+  baseQuote,
+  name,
+}: {
+  sources: PriceSourceInfo[];
+  baseQuote?: BrokerQuote;
+  name: string;
+}) {
+  const [selectedId, setSelectedId] = useState(sources[0]?.id ?? "");
+  const selected = sources.find((s) => s.id === selectedId) ?? sources[0];
+
+  // `baseQuote` is already the official reading when one was available; the
+  // aggregator's own number rides along in `aggregate`. If the official feed
+  // was down we silently kept CriptoYa's, so both options land on it.
+  const quote = selected?.realtime
+    ? baseQuote
+    : (baseQuote?.aggregate ?? baseQuote);
+  const variation = quote?.variation;
+
+  const hasBuy = quote !== undefined && quote.totalAsk > 0;
+  const hasSell = quote !== undefined && quote.totalBid > 0;
+  const hasSpread =
+    quote !== undefined && Number.isFinite(quote.spread) && quote.spread > 0;
+
+  return (
+    <>
+      <section className="mt-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+            Cotización en vivo (BTC/ARS)
+          </h4>
+          {sources.length > 1 && (
+            <SourceSwitcher
+              sources={sources}
+              selectedId={selected?.id ?? ""}
+              onSelect={setSelectedId}
+            />
+          )}
+        </div>
+
+        {selected?.kind === "none" ? (
+          <p className="mt-2 text-sm text-muted">
+            Este exchange no expone un feed de precio, así que no hay cotización
+            para mostrar.
+          </p>
+        ) : quote ? (
+          <>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              <PriceStat
+                label="Compra"
+                value={hasBuy ? fmtArs(quote.totalAsk) : "—"}
+              />
+              <PriceStat
+                label="Venta"
+                value={hasSell ? fmtArs(quote.totalBid) : "—"}
+              />
+              <PriceStat
+                label="Spread"
+                value={hasSpread ? fmtPct(quote.spread * 100) : "—"}
+              />
+            </div>
+            <p className="mt-2 text-[11px] text-muted">
+              Precio final con comisiones · actualizado{" "}
+              {timeAgo(toMillis(quote.time))}
+              {variation !== undefined && (
+                <>
+                  {" · "}
+                  var. 24h{" "}
+                  <span
+                    className={cn(
+                      "font-semibold tabular-nums",
+                      variation > 0
+                        ? "text-up"
+                        : variation < 0
+                          ? "text-down"
+                          : "text-muted",
+                    )}
+                  >
+                    {fmtPct(variation)}
+                  </span>
+                </>
+              )}
+            </p>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-muted">
+            Esperando cotización del feed…
+          </p>
+        )}
+      </section>
+
+      {selected && <SourceSection source={selected} name={name} />}
+    </>
+  );
+}
+
 export function ExchangeDetailDialog({
   data,
   onClose,
@@ -474,7 +617,7 @@ export function ExchangeDetailDialog({
 
   if (!data) return null;
 
-  const { name, logoKey, url, custodial, source, quote, exchange } = data;
+  const { name, logoKey, url, custodial, sources, quote, exchange } = data;
   const score = exchange ? bitcoinerLevel(exchange) : null;
   const met = exchange
     ? BITCOINER_FEATURE_KEYS.filter((key) => exchange.bitcoiner[key])
@@ -482,10 +625,6 @@ export function ExchangeDetailDialog({
   const missing = exchange
     ? BITCOINER_FEATURE_KEYS.filter((key) => !exchange.bitcoiner[key])
     : [];
-  const hasBuy = quote !== undefined && quote.totalAsk > 0;
-  const hasSell = quote !== undefined && quote.totalBid > 0;
-  const hasSpread =
-    quote !== undefined && Number.isFinite(quote.spread) && quote.spread > 0;
 
   return (
     <div
@@ -553,46 +692,13 @@ export function ExchangeDetailDialog({
             </div>
           </div>
 
-          {/* Live quote */}
-          <section className="mt-4">
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-              Cotización en vivo (BTC/ARS)
-            </h4>
-            {source.kind === "none" ? (
-              <p className="mt-2 text-sm text-muted">
-                Este exchange no expone un feed de precio, así que no hay
-                cotización para mostrar.
-              </p>
-            ) : quote ? (
-              <>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  <PriceStat
-                    label="Compra"
-                    value={hasBuy ? fmtArs(quote.totalAsk) : "—"}
-                  />
-                  <PriceStat
-                    label="Venta"
-                    value={hasSell ? fmtArs(quote.totalBid) : "—"}
-                  />
-                  <PriceStat
-                    label="Spread"
-                    value={hasSpread ? fmtPct(quote.spread * 100) : "—"}
-                  />
-                </div>
-                <p className="mt-2 text-[11px] text-muted">
-                  Precio final con comisiones · actualizado{" "}
-                  {timeAgo(toMillis(quote.time))}
-                </p>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-muted">
-                Esperando cotización del feed…
-              </p>
-            )}
-          </section>
-
-          {/* Source (collapsed by default) */}
-          <SourceSection key={logoKey} source={source} name={name} />
+          {/* Live quote + source (with source switcher when >1 available) */}
+          <QuoteSourcePanel
+            key={logoKey}
+            sources={sources}
+            baseQuote={quote}
+            name={name}
+          />
 
           {/* Support + Bitcoiner level (curated exchanges only) */}
           {exchange ? (

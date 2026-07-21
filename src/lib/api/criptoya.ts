@@ -3,6 +3,9 @@
  * Dollar rates: https://criptoya.com/api/dolar
  * BTC/ARS brokers: https://criptoya.com/api/btc/ars/{volume}
  * Both are free, authless and CORS-open (safe to call from the browser).
+ *
+ * Where an exchange publishes its own price feed we always prefer that over the
+ * aggregate — see fetchBrokers and the registry in ./official.
  */
 
 export interface DollarRate {
@@ -90,6 +93,15 @@ export interface BrokerQuote {
   /** Spread as a fraction: (totalAsk - totalBid) / totalBid. */
   spread: number;
   time: number;
+  /** Which kind of feed produced this quote. Absent means the aggregator. */
+  provider?: "official" | "aggregator";
+  /** 24h variation as a percentage — only official feeds publish one. */
+  variation?: number;
+  /**
+   * The aggregator's own reading for this key, preserved when an official feed
+   * took over, so the detail dialog can still offer CriptoYa as a comparison.
+   */
+  aggregate?: BrokerQuote;
 }
 
 interface RawBroker {
@@ -100,92 +112,28 @@ interface RawBroker {
   time?: number;
 }
 
-interface BullBitcoinRateResponse {
-  result?: {
-    element?: {
-      price?: number;
-      precision?: number;
-      createdAt?: string;
-    };
-  };
-}
-
-const BULL_BITCOIN_PRICE_URL = "https://api.bullbitcoin.com/public/price";
-
-function parseBullBitcoinRate(
-  response: BullBitcoinRateResponse,
-): { price?: number; time?: number } {
-  const element = response.result?.element;
-  if (typeof element?.price !== "number") return {};
-
-  const precision = typeof element.precision === "number" ? element.precision : 2;
-  const createdAt =
-    typeof element.createdAt === "string"
-      ? Date.parse(element.createdAt)
-      : undefined;
-
-  return {
-    price: element.price / 10 ** precision,
-    time: Number.isFinite(createdAt) ? createdAt : undefined,
-  };
-}
-
-async function fetchBullBitcoinBroker(
+/**
+ * Live quotes from the exchanges that run their own price feed. In the browser
+ * we go through our proxy, so one shared (CDN-cached) call serves every visitor
+ * and the per-exchange protocol quirks stay server-side; on the server we call
+ * the adapters directly, since a relative proxy URL would not resolve there.
+ * Never throws — a missing official quote just keeps the aggregator's reading.
+ */
+async function fetchOfficialQuotes(
   signal?: AbortSignal,
-  init?: RequestInit,
-): Promise<BrokerQuote | null> {
-  const [sellRes, buyRes] = await Promise.all([
-    fetch(BULL_BITCOIN_PRICE_URL, {
-      ...init,
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "getRate",
-        params: { element: { fromCurrency: "BTC", toCurrency: "ARS" } },
-      }),
-      signal,
-    }),
-    fetch(BULL_BITCOIN_PRICE_URL, {
-      ...init,
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 2,
-        method: "getRate",
-        params: { element: { fromCurrency: "ARS", toCurrency: "BTC" } },
-      }),
-      signal,
-    }),
-  ]);
-
-  if (!sellRes.ok || !buyRes.ok) return null;
-
-  const sell = parseBullBitcoinRate(
-    (await sellRes.json()) as BullBitcoinRateResponse,
-  );
-  const buy = parseBullBitcoinRate(
-    (await buyRes.json()) as BullBitcoinRateResponse,
-  );
-  const totalBid = sell.price ?? 0;
-  const totalAsk = buy.price ?? 0;
-
-  if (totalAsk <= 0 && totalBid <= 0) return null;
-
-  const spread =
-    totalAsk > 0 && totalBid > 0 ? (totalAsk - totalBid) / totalBid : NaN;
-
-  return {
-    key: "bullbitcoin",
-    totalAsk,
-    totalBid,
-    ask: totalAsk,
-    bid: totalBid,
-    spread,
-    time: Math.max(sell.time ?? 0, buy.time ?? 0, Date.now()),
-  };
+): Promise<BrokerQuote[]> {
+  try {
+    if (typeof window === "undefined") {
+      const { fetchAllOfficialQuotes } = await import("./official/fetchers");
+      return await fetchAllOfficialQuotes(signal);
+    }
+    const res = await fetch("/api/market/official", { signal });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { quotes?: BrokerQuote[] };
+    return body.quotes ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchBrokers(
@@ -193,12 +141,12 @@ export async function fetchBrokers(
   signal?: AbortSignal,
   init?: RequestInit,
 ): Promise<BrokerQuote[]> {
-  const [res, bullBitcoin] = await Promise.all([
+  const [res, official] = await Promise.all([
     fetch(`https://criptoya.com/api/btc/ars/${volume}`, {
       ...init,
       signal,
     }),
-    fetchBullBitcoinBroker(signal, init).catch(() => null),
+    fetchOfficialQuotes(signal),
   ]);
   if (!res.ok) throw new Error(`CriptoYa brokers ${res.status}`);
   const j = (await res.json()) as Record<string, RawBroker>;
@@ -225,8 +173,20 @@ export async function fetchBrokers(
     });
   }
 
-  if (bullBitcoin) {
-    quotes.push(bullBitcoin);
+  // An official feed always wins over the aggregate for its own row, but we
+  // keep CriptoYa's reading alongside it so the detail dialog can still show
+  // the comparison. Exchanges with no CriptoYa row (Bull Bitcoin) just join.
+  for (const quote of official) {
+    if (quote.totalAsk <= 0 && quote.totalBid <= 0) continue;
+    const at = quotes.findIndex((q) => q.key === quote.key);
+    if (at === -1) {
+      quotes.push(quote);
+    } else {
+      quotes[at] = {
+        ...quote,
+        aggregate: { ...quotes[at], provider: "aggregator" },
+      };
+    }
   }
 
   return quotes;

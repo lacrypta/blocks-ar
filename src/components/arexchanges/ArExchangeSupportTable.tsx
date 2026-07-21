@@ -11,7 +11,7 @@ import {
   bitcoinerLevel,
   exchangeSupportRank,
 } from "@/lib/data/arExchanges";
-import { resolvePriceSource } from "@/lib/data/priceSource";
+import { listExchangePriceSources } from "@/lib/data/priceSource";
 import { useBrokers } from "@/hooks/useBrokers";
 import type { BrokerQuote } from "@/lib/api/criptoya";
 import {
@@ -168,14 +168,15 @@ export function ArExchangeSupportTable() {
 
   const selectedDetail: ExchangeDetailData | null = useMemo(() => {
     if (!selected) return null;
-    const source = resolvePriceSource(selected);
+    const sources = listExchangePriceSources(selected);
+    const primary = sources[0];
     return {
       name: selected.name,
       logoKey: selected.criptoyaKey ?? selected.key,
       url: selected.url,
       custodial: selected.custodial,
-      source,
-      quote: quotesByKey.get(source.quoteKey ?? ""),
+      sources,
+      quote: quotesByKey.get(primary.quoteKey ?? ""),
       exchange: selected,
     };
   }, [selected, quotesByKey]);
