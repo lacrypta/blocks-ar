@@ -16,6 +16,7 @@ import { Card, CardTitle } from "@/components/ui/Card";
 import { BrokerLogo } from "./BrokerLogo";
 import { IndicatorMenu } from "./IndicatorMenu";
 import {
+  BitcoinerBadge,
   ExchangeDetailDialog,
   type ExchangeDetailData,
 } from "@/components/exchanges/ExchangeDetailDialog";
@@ -33,6 +34,8 @@ type Dir = 1 | -1 | 0;
 interface Row {
   key: string;
   price: number;
+  /** Curated Bitcoiner Index entry, when this price feed maps to an exchange. */
+  exchange?: ArExchange;
   /** BTC price expressed in USDT (price / USDT rate). */
   usdt?: number;
   /** % premium over Bitstamp international price. */
@@ -98,7 +101,7 @@ function Column({
           const best = i === 0;
           const name = brokerName(r.key);
           const rowClassName = cn(
-            "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-fg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            "relative flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-fg transition-colors",
             best ? "bg-up/10 ring-1 ring-up/30" : "hover:bg-surface-2/50",
           );
           const rowContent = (
@@ -109,6 +112,28 @@ function Column({
               <BrokerLogo brokerKey={r.key} />
               <span className="flex min-w-0 flex-1 items-center gap-2">
                 <span className="truncate text-sm font-medium">{name}</span>
+                <span
+                  className="pointer-events-auto relative z-10 inline-flex cursor-pointer"
+                  onClick={() => onSelect(r.key)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelect(r.key);
+                    }
+                  }}
+                >
+                  {r.exchange ? (
+                    <BitcoinerBadge exchange={r.exchange} />
+                  ) : (
+                    <span
+                      aria-label="Nivel Bitcoiner sin datos"
+                      title="Todavía no está en el índice Bitcoiner curado."
+                      className="inline-flex min-w-12 items-center justify-center rounded-full bg-surface-2 px-2 py-1 text-[11px] font-semibold text-muted tabular-nums"
+                    >
+                      —/10
+                    </span>
+                  )}
+                </span>
                 {best && (
                   <span className="shrink-0 rounded bg-up/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-up">
                     Mejor
@@ -135,16 +160,17 @@ function Column({
           );
 
           return (
-            <li key={r.key}>
+            <li key={r.key} className={rowClassName}>
               <button
                 type="button"
                 onClick={() => onSelect(r.key)}
                 aria-haspopup="dialog"
                 aria-label={`Ver detalle y fuente de precio de ${name}`}
-                className={rowClassName}
-              >
+                className="absolute inset-0 cursor-pointer rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              />
+              <span className="pointer-events-none relative z-[1] flex w-full items-center gap-2">
                 {rowContent}
-              </button>
+              </span>
             </li>
           );
         })}
@@ -275,13 +301,23 @@ export function BrokerRankingTable() {
     const buy = quotes
       .filter((q) => q.totalAsk > 0)
       .sort((a, b) => a.totalAsk - b.totalAsk) // cheapest to buy first
-      .map((q) => ({ key: q.key, price: q.totalAsk, ...indicators(q.totalAsk) }));
+      .map((q) => ({
+        key: q.key,
+        price: q.totalAsk,
+        exchange: curatedByBrokerKey.get(q.key),
+        ...indicators(q.totalAsk),
+      }));
     const sell = quotes
       .filter((q) => q.totalBid > 0)
       .sort((a, b) => b.totalBid - a.totalBid) // highest to sell first
-      .map((q) => ({ key: q.key, price: q.totalBid, ...indicators(q.totalBid) }));
+      .map((q) => ({
+        key: q.key,
+        price: q.totalBid,
+        exchange: curatedByBrokerKey.get(q.key),
+        ...indicators(q.totalBid),
+      }));
     return { buy, sell };
-  }, [data, usdtRate, bitstamp]);
+  }, [data, usdtRate, bitstamp, curatedByBrokerKey]);
 
   const visibleBuy = buy.slice(0, limit);
   const visibleSell = sell.slice(0, limit);
