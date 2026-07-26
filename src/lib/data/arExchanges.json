@@ -91,6 +91,29 @@
     }
   },
   {
+    "key": "wapupay",
+    "name": "WapuPay",
+    "url": "https://wapupay.com/",
+    "custodial": true,
+    "btcOnchain": false,
+    "lightning": true,
+    "lightningAddressOut": true,
+    "lightningAddressIn": true,
+    "bitcoiner": {
+      "onchain": false,
+      "lightning": true,
+      "lightningAddressOut": true,
+      "lightningAddressIn": true,
+      "api": true,
+      "selfCustody": false,
+      "nonMandatoryKyc": true,
+      "openSourceContributions": true,
+      "bitcoinOnly": false,
+      "noCryptoOnlyStablecoins": true
+    },
+    "notes": "Red P2P asistida sin KYC. Envía a Lightning Address externas y ofrece una Lightning Address propia con formato usuario@wapu.app."
+  },
+  {
     "key": "nexo",
     "name": "Nexo",
     "url": "https://www.nexo.com/",

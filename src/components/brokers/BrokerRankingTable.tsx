@@ -239,7 +239,9 @@ export function BrokerRankingTable() {
     const map = new Map<string, ArExchange>();
     for (const e of AR_EXCHANGES) {
       if (isProxyFeed(e.key)) continue;
-      const key = e.key === "bullbitcoin" ? "bullbitcoin" : e.criptoyaKey;
+      const key =
+        e.criptoyaKey ??
+        (OFFICIAL_PROVIDER_KEYS.includes(e.key) ? e.key : undefined);
       if (key) map.set(key, e);
     }
     return map;

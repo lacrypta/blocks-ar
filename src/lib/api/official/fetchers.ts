@@ -199,6 +199,88 @@ async function fetchLetsbit(signal?: AbortSignal): Promise<BrokerQuote | null> {
   return officialQuote("letsbit", ask, bid);
 }
 
+/**
+ * WapuPay — direct-fiat RFQ funded with sats over Lightning.
+ *
+ * This flow only covers selling BTC for an ARS transfer, so WapuPay correctly
+ * joins the sell ranking as a one-sided quote. The API returns how many sats the
+ * user must fund (fees included) to deliver the requested ARS amount; converting
+ * that ratio to ARS/BTC gives the final price the user receives.
+ *
+ * The endpoint is authenticated by design. Keep the API token server-side in
+ * WAPU_API_KEY. Without one, the adapter reconstructs the same final rate from
+ * WapuPay's public BTC/ARS rate and current fiat-transfer fee, so the exchange
+ * remains visible without exposing or inventing credentials.
+ */
+async function fetchWapuPay(signal?: AbortSignal): Promise<BrokerQuote | null> {
+  const apiKey = process.env.WAPU_API_KEY;
+  let totalBid: number | undefined;
+
+  if (apiKey) {
+    const amountArs = 100_000;
+    const params = new URLSearchParams({
+      amount_ars: String(amountArs),
+      funding_currency: "SAT",
+      funding_network: "LIGHTNING",
+      type: "fiat_transfer",
+    });
+    const res = await fetch(
+      `https://be-prod.wapu.app/transactions/direct-fiat/quote?${params}`,
+      {
+        headers: { "X-API-Key": apiKey },
+        cache: "no-store",
+        signal: withTimeout(signal),
+      },
+    );
+    if (res.ok) {
+      const quote = (await res.json()) as {
+        amount_ars?: unknown;
+        total_amount_sats?: unknown;
+      };
+      const deliveredArs = num(quote.amount_ars) ?? amountArs;
+      const totalSats = num(quote.total_amount_sats);
+      if (deliveredArs > 0 && totalSats !== undefined && totalSats > 0) {
+        totalBid = (deliveredArs * 100_000_000) / totalSats;
+      }
+    }
+  }
+
+  if (totalBid === undefined) {
+    const [ratesBody, settingsBody] = await Promise.all([
+      getJson("https://be-prod.wapu.app/exchange-rates", signal),
+      getJson("https://be-prod.wapu.app/settings", signal),
+    ]);
+    const rates = (ratesBody as {
+      rates?: Array<{ pair?: string; buy?: unknown }>;
+    }).rates;
+    const settings = (settingsBody as {
+      settings?: { fiat_transfer_fee?: unknown };
+    }).settings;
+    const btcArsBuy = num(rates?.find((rate) => rate.pair === "BTC/ARS")?.buy);
+    const feeRate = num(settings?.fiat_transfer_fee);
+    if (
+      btcArsBuy === undefined ||
+      btcArsBuy <= 0 ||
+      feeRate === undefined ||
+      feeRate < 0
+    ) {
+      return null;
+    }
+    totalBid = btcArsBuy / (1 + feeRate);
+  }
+
+  return {
+    key: "wapupay",
+    totalAsk: 0,
+    totalBid,
+    ask: 0,
+    bid: totalBid,
+    spread: NaN,
+    provider: "official",
+    time: Date.now(),
+  };
+}
+
 type Fetcher = (signal?: AbortSignal) => Promise<BrokerQuote | null>;
 
 const FETCHERS: Record<string, Fetcher> = {
@@ -209,6 +291,7 @@ const FETCHERS: Record<string, Fetcher> = {
   tiendacrypto: fetchTiendaCrypto,
   ripio: fetchRipio,
   letsbit: fetchLetsbit,
+  wapupay: fetchWapuPay,
 };
 
 /** Fetch one provider's official quote. Never throws. */

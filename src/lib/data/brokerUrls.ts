@@ -32,6 +32,7 @@ const URLS: Record<string, string> = {
   trubit: "https://www.trubit.com/",
   universalcoins: "https://www.universalcoins.net/",
   vitawallet: "https://vitawallet.io/",
+  wapupay: "https://wapupay.com/",
 };
 
 export function brokerUrl(key: string): string | undefined {
