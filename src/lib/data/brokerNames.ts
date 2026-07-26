@@ -32,6 +32,7 @@ const NAMES: Record<string, string> = {
   nexo: "Nexo",
   prex: "Prex",
   trubit: "TruBit",
+  wapupay: "WapuPay",
 };
 
 export function brokerName(key: string): string {

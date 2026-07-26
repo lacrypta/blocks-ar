@@ -33,4 +33,5 @@ export const BROKER_LOGO_KEYS: ReadonlySet<string> = new Set([
   "trubit",
   "universalcoins",
   "vitawallet",
+  "wapupay",
 ]);

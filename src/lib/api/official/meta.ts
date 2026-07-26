@@ -92,6 +92,16 @@ export const OFFICIAL_PROVIDER_META: Record<string, OfficialProviderMeta> = {
     description:
       "Fuente por defecto: se pide una cotización en firme a la API pública de Letsbit por 0,1 BTC, el mismo volumen que usa el ranking.",
   },
+  wapupay: {
+    key: "wapupay",
+    provider: "WapuPay — API oficial",
+    shortLabel: "WapuPay API",
+    endpoint:
+      "https://be-prod.wapu.app/transactions/direct-fiat/quote (fallback público: /exchange-rates + /settings)",
+    description:
+      "Cotización oficial para vender sats por Lightning y entregar ARS, con la comisión de transferencia normal incluida. Usa direct-fiat/quote con API key; sin ella reconstruye el mismo precio final desde la tasa BTC/ARS y la comisión pública vigente de WapuPay.",
+    aggregateAvailable: false,
+  },
 };
 
 export const OFFICIAL_PROVIDER_KEYS = Object.keys(OFFICIAL_PROVIDER_META);

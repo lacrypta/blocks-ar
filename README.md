@@ -16,6 +16,11 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+WapuPay appears in the live sell ranking using its public BTC/ARS rate and
+current fiat-transfer fee. Set `WAPU_API_KEY` to a WapuPay API token to source
+the final price directly from its authenticated direct-fiat quote endpoint. The
+token is only read by the server-side official-feed adapter.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
