@@ -14,6 +14,7 @@ const NAV_BY_WIDGET: Record<string, { href: string; label: string }> = {
   paridad: { href: "#paridad", label: "Paridad" },
   precio: { href: "#precio", label: "Precio" },
   dolares: { href: "#dolares", label: "Dólares" },
+  convertir: { href: "#convertir", label: "Convertir" },
   red: { href: "#red", label: "Red" },
   brokers: { href: "#brokers", label: "Brokers" },
   "exchanges-ar": { href: "#exchanges", label: "Exchanges" },

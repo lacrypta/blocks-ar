@@ -7,6 +7,7 @@ export const DEFAULT_ORDER = [
   "paridad",
   "precio",
   "dolares",
+  "convertir",
   "red",
   "brokers",
   "exchanges-ar",

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { SatParityHero } from "@/components/price/SatParityHero";
 import { BitstampMarketWidget } from "@/components/price/BitstampMarketWidget";
 import { DollarBlock } from "@/components/dollars/DollarBlock";
+import { SwapBlock } from "@/components/swap/SwapBlock";
 import { NetworkBlock } from "@/components/network/NetworkBlock";
 import { BrokerRankingTable } from "@/components/brokers/BrokerRankingTable";
 import { ArExchangeSupportTable } from "@/components/arexchanges/ArExchangeSupportTable";
@@ -31,6 +32,12 @@ export const WIDGETS: Record<string, WidgetDef> = {
     title: "Dólares",
     span: "half",
     render: () => <DollarBlock />,
+  },
+  convertir: {
+    id: "convertir",
+    title: "Convertir sats",
+    span: "full",
+    render: () => <SwapBlock />,
   },
   red: {
     id: "red",
