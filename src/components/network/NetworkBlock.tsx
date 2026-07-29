@@ -17,7 +17,7 @@ function FeeTier({
     <div className="glass-card-soft rounded-xl border p-3 text-center">
       <div className="text-[11px] text-muted">{label}</div>
       <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
-        {value ?? "—"}
+        {fmtNumber(value, 1)}
       </div>
       <div className={`text-[11px] ${tone}`}>sat/vB</div>
     </div>

@@ -20,23 +20,25 @@ export function MempoolFeeBadge() {
 
   const average =
     values.length > 0
-      ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+      ? values.reduce((sum, value) => sum + value, 0) / values.length
       : undefined;
+  const formattedAverage =
+    average !== undefined ? fmtNumber(average, 1) : undefined;
 
   return (
     <div className="group relative flex-none">
       <span
         tabIndex={0}
         aria-label={
-          average !== undefined
-            ? `Mempool promedio ${average} satoshis por vByte`
+          formattedAverage !== undefined
+            ? `Mempool promedio ${formattedAverage} satoshis por vByte`
             : "Mempool sin datos"
         }
         className="glass-pill inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted outline-none ring-offset-2 transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-primary"
       >
         <MempoolIcon className="h-4 w-4 text-primary" />
         <span className="font-semibold text-fg">
-          {average !== undefined ? fmtNumber(average) : "—"}
+          {formattedAverage ?? "—"}
         </span>
         <span className="hidden sm:inline">sat/vB</span>
       </span>
@@ -51,7 +53,9 @@ export function MempoolFeeBadge() {
             Mempool promedio
           </span>
           <span className="mt-1 block text-[11px] text-muted">
-            {average !== undefined ? `${fmtNumber(average)} sat/vB` : "—"}
+            {formattedAverage !== undefined
+              ? `${formattedAverage} sat/vB`
+              : "—"}
           </span>
 
           <span className="mt-3 grid gap-1.5">
@@ -62,7 +66,7 @@ export function MempoolFeeBadge() {
               >
                 <span className="text-muted">{item.label}</span>
                 <span className="font-mono font-semibold tabular-nums text-fg">
-                  {fees ? fmtNumber(fees[item.key]) : "—"} sat/vB
+                  {fees ? fmtNumber(fees[item.key], 1) : "—"} sat/vB
                 </span>
               </span>
             ))}
