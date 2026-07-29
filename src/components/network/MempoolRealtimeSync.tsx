@@ -105,11 +105,13 @@ export function MempoolRealtimeSync() {
           const message = JSON.parse(String(event.data)) as MempoolWebsocketMessage;
 
           if (isRecommendedFees(message.fees)) {
+            void queryClient.cancelQueries({ queryKey: ["fees"] });
             queryClient.setQueryData<RecommendedFees>(["fees"], message.fees);
           }
 
           const height = getLatestHeight(message);
           if (height !== undefined) {
+            void queryClient.cancelQueries({ queryKey: ["tip-height"] });
             queryClient.setQueryData<number>(["tip-height"], height);
           }
         } catch {

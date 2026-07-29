@@ -4,41 +4,32 @@ import { useFees } from "@/hooks/useNetwork";
 import { fmtNumber } from "@/lib/format";
 
 const FEE_LABELS = [
-  { key: "minimumFee", label: "No priority" },
-  { key: "economyFee", label: "Low" },
-  { key: "halfHourFee", label: "Mid" },
-  { key: "fastestFee", label: "High" },
+  { key: "fastestFee", label: "Alta" },
+  { key: "halfHourFee", label: "Media" },
+  { key: "hourFee", label: "Baja" },
+  { key: "economyFee", label: "Económica" },
+  { key: "minimumFee", label: "Sin prioridad" },
 ] as const;
 
 export function MempoolFeeBadge() {
   const { data: fees } = useFees();
-  const values = fees
-    ? FEE_LABELS.map((item) => fees[item.key]).filter((value) =>
-        Number.isFinite(value),
-      )
-    : [];
-
-  const average =
-    values.length > 0
-      ? values.reduce((sum, value) => sum + value, 0) / values.length
-      : undefined;
-  const formattedAverage =
-    average !== undefined ? fmtNumber(average, 1) : undefined;
+  const mediumFee = fees?.halfHourFee;
+  const formattedMediumFee = fmtNumber(mediumFee, 1);
 
   return (
     <div className="group relative flex-none">
       <span
         tabIndex={0}
         aria-label={
-          formattedAverage !== undefined
-            ? `Mempool promedio ${formattedAverage} satoshis por vByte`
+          mediumFee !== undefined
+            ? `Mempool prioridad media ${formattedMediumFee} satoshis por vByte`
             : "Mempool sin datos"
         }
         className="glass-pill inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted outline-none ring-offset-2 transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-primary"
       >
         <MempoolIcon className="h-4 w-4 text-primary" />
         <span className="font-semibold text-fg">
-          {formattedAverage ?? "—"}
+          {formattedMediumFee}
         </span>
         <span className="hidden sm:inline">sat/vB</span>
       </span>
@@ -50,12 +41,10 @@ export function MempoolFeeBadge() {
       >
         <div className="glass-popover rounded-xl border p-3 text-left">
           <span className="block text-[11px] font-semibold text-fg">
-            Mempool promedio
+            Mempool.space · prioridad media
           </span>
           <span className="mt-1 block text-[11px] text-muted">
-            {formattedAverage !== undefined
-              ? `${formattedAverage} sat/vB`
-              : "—"}
+            {mediumFee !== undefined ? `${formattedMediumFee} sat/vB` : "—"}
           </span>
 
           <span className="mt-3 grid gap-1.5">
