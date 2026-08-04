@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useBtcArs } from "@/hooks/useBtcArs";
 import { satToArs, SATS_PER_BTC } from "@/lib/calc/satArs";
 import { SatSymbol } from "@/components/icons/SatSymbol";
+import {
+  MARKET_SOURCE_KEY,
+  SatConverterDialog,
+} from "@/components/price/SatConverterDialog";
 import { fmtArs, fmtSatArs, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
@@ -29,8 +34,31 @@ function SatArsDisplay({ value }: { value?: number }) {
   );
 }
 
+function SwapIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 21V3" />
+      <path d="M4.5 6.5L8 3L11.5 6.5" />
+      <path d="M16 3V21" />
+      <path d="M12.5 17.5L16 21L19.5 17.5" />
+    </svg>
+  );
+}
+
 export function SatParityHero() {
   const { value: btcArs, bestAsk, isLoading } = useBtcArs();
+  const [converterOpen, setConverterOpen] = useState(false);
+  // Kept here so the picked exchange survives closing and reopening the modal.
+  const [converterSource, setConverterSource] = useState(MARKET_SOURCE_KEY);
   const displayBtcArs = btcArs;
   const displayBestAsk = bestAsk;
   const satArs =
@@ -52,6 +80,16 @@ export function SatParityHero() {
       id="paridad"
       className="glass-card relative overflow-hidden rounded-3xl border bg-gradient-to-br from-primary/10 via-white/10 to-bitcoin/12 p-6 sm:p-8"
     >
+      <button
+        type="button"
+        onClick={() => setConverterOpen(true)}
+        aria-haspopup="dialog"
+        className="glass-pill !absolute right-4 top-4 z-10 inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold text-muted transition-colors hover:text-fg sm:right-6 sm:top-6"
+      >
+        <SwapIcon className="h-3.5 w-3.5" />
+        Convertir
+      </button>
+
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
@@ -139,6 +177,13 @@ export function SatParityHero() {
           </div>
         </div>
       </div>
+
+      <SatConverterDialog
+        open={converterOpen}
+        onClose={() => setConverterOpen(false)}
+        sourceKey={converterSource}
+        onSourceChange={setConverterSource}
+      />
     </section>
   );
 }
