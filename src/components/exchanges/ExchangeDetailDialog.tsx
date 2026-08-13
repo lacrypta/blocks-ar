@@ -157,7 +157,7 @@ export function FeatureToken({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium",
+        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium",
         tone === "positive" ? "bg-up/10 text-up" : "bg-surface-2 text-muted",
       )}
     >
@@ -238,7 +238,7 @@ export function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
         aria-describedby={open ? tooltipId : undefined}
         aria-label={`Bitcoiner Level ${score} de 10`}
         className={cn(
-          "inline-flex min-w-12 items-center justify-center rounded-full px-2 py-1 text-[11px] font-semibold tabular-nums outline-none ring-offset-2 transition-shadow focus-visible:ring-2 focus-visible:ring-primary",
+          "inline-flex min-w-12 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold tabular-nums outline-none ring-offset-2 transition-shadow focus-visible:ring-2 focus-visible:ring-primary",
           score >= 7
             ? "bg-bitcoin/15 text-bitcoin"
             : score >= 4
@@ -267,14 +267,14 @@ export function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
                   "color-mix(in srgb, var(--border) 82%, var(--primary) 18%)",
               }}
             >
-              <span className="block text-[11px] font-semibold text-fg">
+              <span className="block text-xs font-semibold text-fg">
                 Bitcoiner Level {score}/10
               </span>
-              <span className="mt-1 block text-[11px] text-muted">
+              <span className="mt-1 block text-xs text-muted">
                 Suma 1 punto por cada criterio cumplido.
               </span>
 
-              <span className="mt-2 block text-[11px] text-up">Cumple</span>
+              <span className="mt-2 block text-xs text-up">Cumple</span>
               <span className="mt-1 flex flex-wrap gap-1">
                 {met.length > 0 ? (
                   breakdown
@@ -287,11 +287,11 @@ export function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
                       />
                     ))
                 ) : (
-                  <span className="text-[11px] text-muted">ninguno</span>
+                  <span className="text-xs text-muted">ninguno</span>
                 )}
               </span>
 
-              <span className="mt-2 block text-[11px] text-muted">Falta</span>
+              <span className="mt-2 block text-xs text-muted">Falta</span>
               <span className="mt-1 flex flex-wrap gap-1">
                 {missing.length > 0 ? (
                   breakdown
@@ -304,7 +304,7 @@ export function BitcoinerBadge({ exchange }: { exchange: ArExchange }) {
                       />
                     ))
                 ) : (
-                  <span className="text-[11px] text-up">nada</span>
+                  <span className="text-xs text-up">nada</span>
                 )}
               </span>
             </span>
@@ -319,7 +319,7 @@ function SupportChip({ ok, label }: { ok: boolean; label: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium",
+        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium",
         ok
           ? "border-up/30 bg-up/10 text-up"
           : "border-border bg-surface-2 text-muted",
@@ -342,7 +342,7 @@ function PriceStat({
 }) {
   return (
     <div className="glass-card-soft rounded-xl border p-3">
-      <span className="block text-[11px] font-medium text-muted">{label}</span>
+      <span className="block text-xs font-medium text-muted">{label}</span>
       <span
         className={cn(
           "mt-1 block font-mono text-base font-semibold tabular-nums",
@@ -408,13 +408,13 @@ function SourceSection({
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-2 rounded text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted">
           De dónde salen los datos
         </span>
         <span className="flex items-center gap-2">
           <span
             className={cn(
-              "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+              "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide",
               SOURCE_TONE[source.kind],
             )}
           >
@@ -432,22 +432,22 @@ function SourceSection({
       {open && (
         <div className="glass-card-soft mt-2 rounded-xl border p-3">
           <p className="text-sm font-semibold text-fg">{source.provider}</p>
-          <p className="mt-1 text-[11px] leading-relaxed text-muted">
+          <p className="mt-1 text-xs leading-relaxed text-muted">
             {source.description}
           </p>
           {source.endpoint && (
-            <p className="mt-2 break-all font-mono text-[11px] text-muted">
+            <p className="mt-2 break-all font-mono text-xs text-muted">
               <span className="text-fg">endpoint:</span> {source.endpoint}
             </p>
           )}
           {source.criptoyaKey && (
-            <p className="mt-1 font-mono text-[11px] text-muted">
+            <p className="mt-1 font-mono text-xs text-muted">
               <span className="text-fg">clave CriptoYa:</span>{" "}
               {source.criptoyaKey}
             </p>
           )}
           {source.proxyOf && (
-            <p className="mt-2 rounded-lg border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[11px] text-gold">
+            <p className="mt-2 rounded-lg border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-xs text-gold">
               ⚠️ Ojo: el precio es de {source.proxyOf}, no de {name}.
             </p>
           )}
@@ -480,7 +480,7 @@ function SourceSwitcher({
           onClick={() => onSelect(source.id)}
           aria-pressed={selectedId === source.id}
           className={cn(
-            "h-6 rounded-md px-2.5 text-[11px] font-semibold transition-colors",
+            "h-6 rounded-md px-2.5 text-xs font-semibold transition-colors",
             selectedId === source.id
               ? "bg-primary text-white shadow-sm"
               : "text-muted hover:bg-white/20 hover:text-fg dark:hover:bg-white/5",
@@ -529,7 +529,7 @@ function QuoteSourcePanel({
     <>
       <section className="mt-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">
             Cotización en vivo (BTC/ARS)
           </h4>
           {sources.length > 1 && (
@@ -562,7 +562,7 @@ function QuoteSourcePanel({
                 value={hasSpread ? fmtPct(quote.spread * 100) : "—"}
               />
             </div>
-            <p className="mt-2 text-[11px] text-muted">
+            <p className="mt-2 text-xs text-muted">
               Precio final con comisiones · actualizado{" "}
               {timeAgo(toMillis(quote.time))}
               {variation !== undefined && (
@@ -654,7 +654,7 @@ export function ExchangeDetailDialog({
                   {name}
                 </h3>
                 {(custodial !== undefined || url) && (
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px]">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
                     {custodial !== undefined && (
                       <span className="text-muted">
                         {custodial ? "Custodial" : "No custodial"}
@@ -704,7 +704,7 @@ export function ExchangeDetailDialog({
           {exchange ? (
             <>
               <section className="mt-4">
-                <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">
                   Soporte Bitcoin
                 </h4>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -723,39 +723,39 @@ export function ExchangeDetailDialog({
 
               <section className="mt-4">
                 <div className="flex items-baseline justify-between">
-                  <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">
                     Nivel Bitcoiner
                   </h4>
-                  <span className="text-[11px] font-semibold tabular-nums text-fg">
+                  <span className="text-xs font-semibold tabular-nums text-fg">
                     {score}/10
                   </span>
                 </div>
 
-                <span className="mt-2 block text-[11px] text-up">Cumple</span>
+                <span className="mt-2 block text-xs text-up">Cumple</span>
                 <span className="mt-1 flex flex-wrap gap-1">
                   {met.length > 0 ? (
                     met.map((key) => (
                       <FeatureToken key={key} featureKey={key} tone="positive" />
                     ))
                   ) : (
-                    <span className="text-[11px] text-muted">ninguno</span>
+                    <span className="text-xs text-muted">ninguno</span>
                   )}
                 </span>
 
-                <span className="mt-2 block text-[11px] text-muted">Falta</span>
+                <span className="mt-2 block text-xs text-muted">Falta</span>
                 <span className="mt-1 flex flex-wrap gap-1">
                   {missing.length > 0 ? (
                     missing.map((key) => (
                       <FeatureToken key={key} featureKey={key} tone="muted" />
                     ))
                   ) : (
-                    <span className="text-[11px] text-up">nada</span>
+                    <span className="text-xs text-up">nada</span>
                   )}
                 </span>
               </section>
             </>
           ) : (
-            <p className="mt-4 text-[11px] text-muted">
+            <p className="mt-4 text-xs text-muted">
               Todavía no está en el índice Bitcoiner curado.{" "}
               <a
                 href={AR_EXCHANGES_GITHUB_EDIT_URL}

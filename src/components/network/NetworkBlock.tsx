@@ -21,12 +21,12 @@ function FeeTier({
 }) {
   return (
     <div className="glass-card-soft rounded-xl border p-3 text-center">
-      <div className="text-[11px] text-muted">{label}</div>
+      <div className="text-xs text-muted">{label}</div>
       <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
         {fmtNumber(value, 1)}
       </div>
-      <div className={`text-[11px] ${tone}`}>sat/vB</div>
-      <div className="mt-1 text-[11px] text-muted">
+      <div className={`text-xs ${tone}`}>sat/vB</div>
+      <div className="mt-1 text-xs text-muted">
         {arsPerTransaction !== undefined
           ? `≈ ${fmtArs(arsPerTransaction)} / tx`
           : "— / tx"}
@@ -38,7 +38,7 @@ function FeeTier({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="glass-card-soft rounded-xl border p-3">
-      <div className="text-[11px] text-muted">{label}</div>
+      <div className="text-xs text-muted">{label}</div>
       <div className="mt-1 font-mono text-lg font-semibold tabular-nums">
         {value}
       </div>
@@ -57,7 +57,7 @@ export function NetworkBlock() {
 
   return (
     <Card>
-      <CardTitle id="red">Red Bitcoin</CardTitle>
+      <CardTitle>Red Bitcoin</CardTitle>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         <FeeTier
@@ -91,7 +91,7 @@ export function NetworkBlock() {
           tone="text-muted"
         />
       </div>
-      <p className="mt-2 text-[11px] text-muted">
+      <p className="mt-2 text-xs text-muted">
         Estimado por transacción SegWit estándar de {STANDARD_TRANSACTION_VBYTES} vB.
       </p>
 

@@ -2,16 +2,19 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import type { CSSProperties } from "react";
 import type { WidgetDef } from "./registry";
 import { cn } from "@/lib/cn";
 
 export function SortableWidget({
   def,
   editMode,
+  eager = false,
   onHide,
 }: {
   def: WidgetDef;
   editMode: boolean;
+  eager?: boolean;
   onHide: () => void;
 }) {
   const {
@@ -24,9 +27,11 @@ export function SortableWidget({
     isDragging,
   } = useSortable({ id: def.id, disabled: !editMode });
 
-  const style = {
+  const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition,
+    contentVisibility: editMode ? "visible" : "auto",
+    containIntrinsicSize: "auto 500px",
   };
 
   const spanClass = def.span === "full" ? "lg:col-span-2" : "col-span-1";
@@ -50,7 +55,7 @@ export function SortableWidget({
             {...attributes}
             {...listeners}
             aria-label={`Mover ${def.title}`}
-            className="glass-pill pointer-events-auto inline-flex cursor-grab items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium text-fg active:cursor-grabbing"
+            className="glass-pill pointer-events-auto inline-flex cursor-grab items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium text-fg active:cursor-grabbing"
           >
             <GripIcon className="h-3.5 w-3.5 text-muted" />
             {def.title}
@@ -58,7 +63,7 @@ export function SortableWidget({
           <button
             onClick={onHide}
             aria-label={`Ocultar ${def.title}`}
-            className="glass-pill pointer-events-auto inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium text-muted hover:text-down"
+            className="glass-pill pointer-events-auto inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium text-muted hover:text-down"
           >
             <EyeOffIcon className="h-3.5 w-3.5" />
             Ocultar
@@ -72,7 +77,7 @@ export function SortableWidget({
           editMode && "pointer-events-none select-none",
         )}
       >
-        {def.render()}
+        {def.render(eager)}
       </div>
     </div>
   );

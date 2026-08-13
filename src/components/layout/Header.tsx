@@ -41,7 +41,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/15 bg-bg/60 backdrop-blur-xl dark:border-white/8">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6">
-        <Link href="/" aria-label="Blocks.AR — inicio">
+        <Link href="/">
           <BrandLogo />
         </Link>
 
@@ -63,9 +63,8 @@ export function Header() {
             href="https://1satoshi1peso.ar/ARS"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Abrir 1Satoshi1Peso"
             title="Ver 1 sat = 1 peso"
-            className="glass-pill inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
+            className="glass-pill inline-flex h-9 w-[7.1rem] shrink-0 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
           >
             <span className="inline-flex items-center gap-1">
               <span>1</span>

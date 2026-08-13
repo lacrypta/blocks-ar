@@ -21,7 +21,7 @@ export function PriceUsdPanel() {
     <Card>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-muted">BTC / USD</h2>
-        <span className="text-[11px] text-muted">en vivo · exchanges</span>
+        <span className="text-xs text-muted">en vivo · exchanges</span>
       </div>
       <div className="grid grid-cols-3 gap-4">
         <Stat label="Mediana" value={fmtUsd(median, true)} />

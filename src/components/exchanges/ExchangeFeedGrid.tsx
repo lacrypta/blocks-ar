@@ -27,7 +27,7 @@ export function ExchangeFeedGrid() {
             <div className="mt-1.5 font-mono text-base font-semibold tabular-nums">
               {fmtUsd(f.price, true)}
             </div>
-            <div className="mt-0.5 flex items-center justify-between text-[11px]">
+            <div className="mt-0.5 flex items-center justify-between text-xs">
               <span className="text-muted">{ex.quote}</span>
               {f.changePct !== undefined && (
                 <span className={cn(up ? "text-up" : "text-down")}>

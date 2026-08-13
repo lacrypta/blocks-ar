@@ -46,7 +46,7 @@ function Arrow({ dir }: { dir: Dir }) {
   return (
     <span
       className={cn(
-        "w-3 shrink-0 text-center text-[11px]",
+        "w-3 shrink-0 text-center text-xs",
         dir === 1 ? "text-up" : dir === -1 ? "text-down" : "text-muted",
       )}
     >
@@ -80,7 +80,7 @@ function Column({
     <div>
       <div className="mb-2 flex items-baseline justify-between">
         <h3 className="text-sm font-bold">{title}</h3>
-        <span className="text-[11px] text-muted">{hint}</span>
+        <span className="text-xs text-muted">{hint}</span>
       </div>
       <ol className="flex flex-col gap-0.5">
         {loading &&
@@ -128,26 +128,26 @@ function Column({
                     <span
                       aria-label="Nivel Bitcoiner sin datos"
                       title="Todavía no está en el índice Bitcoiner curado."
-                      className="inline-flex min-w-12 items-center justify-center rounded-full bg-surface-2 px-2 py-1 text-[11px] font-semibold text-muted tabular-nums"
+                      className="inline-flex min-w-12 items-center justify-center rounded-full bg-surface-2 px-2 py-1 text-xs font-semibold text-muted tabular-nums"
                     >
                       —/10
                     </span>
                   )}
                 </span>
                 {best && (
-                  <span className="shrink-0 rounded bg-up/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-up">
+                  <span className="shrink-0 rounded bg-up/15 px-1.5 py-0.5 text-xs font-semibold uppercase text-up">
                     Mejor
                   </span>
                 )}
               </span>
 
               {prefs.difBitstamp && (
-                <span className="w-12 shrink-0 text-right text-[11px] text-muted tabular-nums">
+                <span className="w-12 shrink-0 text-right text-xs text-muted tabular-nums">
                   {r.dif !== undefined ? fmtPct(r.dif) : "—"}
                 </span>
               )}
               {prefs.usdt && (
-                <span className="w-14 shrink-0 text-right text-[11px] text-muted tabular-nums">
+                <span className="w-14 shrink-0 text-right text-xs text-muted tabular-nums">
                   {r.usdt !== undefined ? fmtNumber(r.usdt) : "—"}
                 </span>
               )}
@@ -187,7 +187,7 @@ function LimitControl({
   onChange: (limit: number) => void;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-border/60 pt-3 text-[11px] text-muted">
+    <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-border/60 pt-3 text-xs text-muted">
       <span>Mostrar top</span>
       <div className="glass-pill inline-flex h-8 items-center overflow-hidden rounded-lg border p-0.5">
         {BROKER_LIMIT_OPTIONS.map((option) => (
@@ -197,7 +197,7 @@ function LimitControl({
             onClick={() => onChange(option)}
             aria-pressed={limit === option}
             className={cn(
-              "h-6 rounded-md px-2.5 text-[11px] font-semibold tabular-nums transition-colors",
+              "h-6 rounded-md px-2.5 text-xs font-semibold tabular-nums transition-colors",
               limit === option
                 ? "bg-primary text-white shadow-sm"
                 : "text-muted hover:bg-white/20 hover:text-fg dark:hover:bg-white/5",
@@ -327,7 +327,6 @@ export function BrokerRankingTable() {
   return (
     <Card>
       <CardTitle
-        id="brokers"
         right={<IndicatorMenu prefs={prefs} onToggle={toggle} />}
       >
         Brokers argentinos — mejores precios
@@ -366,7 +365,7 @@ export function BrokerRankingTable() {
 
       {!isError && <LimitControl limit={limit} onChange={setLimit} />}
 
-      <p className="mt-3 text-[11px] text-muted">
+      <p className="mt-3 text-xs text-muted">
         Precios finales con comisiones incluidas · fuente CriptoYa, con la API
         oficial del exchange cuando publica una comparable ({officialCount}).
         {hasNexoAlias && " · Nexo muestra precios del feed de Buenbit vía CriptoYa."}

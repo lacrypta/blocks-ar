@@ -25,7 +25,7 @@ export function MempoolFeeBadge() {
             ? `Mempool prioridad media ${formattedMediumFee} satoshis por vByte`
             : "Mempool sin datos"
         }
-        className="glass-pill inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted outline-none ring-offset-2 transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-primary"
+        className="glass-pill inline-flex h-9 min-w-[3.95rem] items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted outline-none ring-offset-2 transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-primary"
       >
         <MempoolIcon className="h-4 w-4 text-primary" />
         <span className="font-semibold text-fg">
@@ -40,10 +40,10 @@ export function MempoolFeeBadge() {
         className="pointer-events-none absolute right-0 top-full z-[60] mt-2 w-max max-w-64 origin-top-right opacity-0 invisible -translate-y-1 scale-95 transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100"
       >
         <div className="glass-popover rounded-xl border p-3 text-left">
-          <span className="block text-[11px] font-semibold text-fg">
+          <span className="block text-xs font-semibold text-fg">
             Mempool.space · prioridad media
           </span>
-          <span className="mt-1 block text-[11px] text-muted">
+          <span className="mt-1 block text-xs text-muted">
             {mediumFee !== undefined ? `${formattedMediumFee} sat/vB` : "—"}
           </span>
 
@@ -51,7 +51,7 @@ export function MempoolFeeBadge() {
             {FEE_LABELS.map((item) => (
               <span
                 key={item.key}
-                className="flex items-center justify-between gap-3 text-[11px]"
+                className="flex items-center justify-between gap-3 text-xs"
               >
                 <span className="text-muted">{item.label}</span>
                 <span className="font-mono font-semibold tabular-nums text-fg">
