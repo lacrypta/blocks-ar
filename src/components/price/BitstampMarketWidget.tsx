@@ -17,7 +17,7 @@ function TrendPill({ label, value }: { label: string; value?: number }) {
 
   return (
     <div className="glass-card-soft rounded-xl border px-3 py-2">
-      <span className="block text-[11px] font-medium text-muted">{label}</span>
+      <span className="block text-xs font-medium text-muted">{label}</span>
       <span
         className={cn(
           "mt-1 block font-mono text-sm font-semibold tabular-nums",
@@ -76,7 +76,7 @@ function FearGreedMeter({
       <div className="mb-1 flex items-baseline justify-between gap-2">
         <span className="text-xs font-semibold text-muted">Fear &amp; Greed</span>
         {source && (
-          <span className="text-[10px] text-muted">
+          <span className="text-xs text-muted">
             vía <span className="font-semibold text-fg">{source}</span>
           </span>
         )}
@@ -193,7 +193,7 @@ export function BitstampMarketWidget() {
       <CardTitle
         id="precio"
         right={
-          <div className="flex items-center gap-3 text-[11px] text-muted">
+          <div className="flex items-center gap-3 text-xs text-muted">
             <span>
               Fuente <span className="font-semibold text-fg">Bitstamp</span>
             </span>
@@ -208,7 +208,7 @@ export function BitstampMarketWidget() {
       </CardTitle>
 
       <div>
-        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+        <div className="text-xs font-semibold uppercase tracking-wide text-muted">
           Precio spot
         </div>
         <div className="mt-1 font-mono text-4xl font-bold tabular-nums text-fg">

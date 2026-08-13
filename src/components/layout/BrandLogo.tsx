@@ -55,7 +55,7 @@ export function BrandLogo({
           Blocks<span className="text-bitcoin">.AR</span>
         </span>
         {tagline && (
-          <span className="text-[11px] text-muted">Sats argentos 🇦🇷</span>
+          <span className="text-xs text-muted">Sats argentos 🇦🇷</span>
         )}
       </span>
     </span>

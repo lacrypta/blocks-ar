@@ -92,8 +92,8 @@
   --color-down: var(--down);
   --color-online: var(--online);
   --color-offline: var(--offline);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 html {

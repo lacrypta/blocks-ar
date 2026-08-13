@@ -1,20 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FeedsManager } from "@/components/exchanges/FeedsManager";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const siteTitle = "Blocks.AR — Bitcoin y sats en pesos argentinos";
 const siteDescription =
@@ -26,21 +15,6 @@ const socialImage = {
   height: 630,
   alt: "Blocks.AR muestra el precio de 1 satoshi en pesos argentinos",
 };
-const themeIntroBootScript = `
-(() => {
-  try {
-    const system = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    const opposite = system === "dark" ? "light" : "dark";
-    const root = document.documentElement;
-
-    root.classList.remove("light", "dark");
-    root.classList.add(opposite);
-    root.style.colorScheme = opposite;
-    localStorage.setItem("theme", opposite);
-  } catch {}
-})();
-`;
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: siteTitle,
@@ -76,7 +50,7 @@ export default function RootLayout({
     <html
       lang="es-AR"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col bg-bg text-fg">
         <Providers>
@@ -87,10 +61,6 @@ export default function RootLayout({
           </main>
           <Footer />
         </Providers>
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: themeIntroBootScript }}
-        />
       </body>
     </html>
   );

@@ -45,7 +45,7 @@ export function BrokerLogo({
           onError={() => setFailed(true)}
         />
       ) : (
-        <span className="text-[11px] font-bold text-zinc-700">
+        <span aria-hidden="true" className="text-xs font-bold text-zinc-700">
           {name.charAt(0)}
         </span>
       )}

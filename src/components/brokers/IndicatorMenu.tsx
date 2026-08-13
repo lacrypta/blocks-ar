@@ -69,14 +69,13 @@ export function IndicatorMenu({
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        aria-label="Indicadores"
         aria-expanded={open}
         className="glass-pill inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg"
       >
         <SlidersIcon className="h-4 w-4" />
         Indicadores
         {active > 0 && (
-          <span className="rounded bg-bitcoin/15 px-1 text-[10px] font-semibold text-bitcoin tabular-nums">
+          <span className="rounded bg-bitcoin/15 px-1 text-xs font-semibold text-bitcoin tabular-nums">
             {active}
           </span>
         )}
@@ -98,7 +97,7 @@ export function IndicatorMenu({
             >
               <span className="flex flex-col">
                 <span className="text-sm font-medium">{it.label}</span>
-                <span className="text-[11px] text-muted">{it.hint}</span>
+                <span className="text-xs text-muted">{it.hint}</span>
               </span>
               <Switch on={prefs[it.key]} />
             </button>

@@ -260,7 +260,7 @@ function SourcePicker({
         <span className="min-w-0 flex-1 truncate text-sm font-medium text-fg">
           {selected.name}
         </span>
-        <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted">
+        <span className="shrink-0 font-mono text-xs tabular-nums text-muted">
           {fmtArs(selected.price)}
         </span>
         <ChevronDown
@@ -330,14 +330,14 @@ function SourcePicker({
                   <span className="min-w-0 flex-1 truncate text-sm">
                     {option.name}
                   </span>
-                  <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted">
+                  <span className="shrink-0 font-mono text-xs tabular-nums text-muted">
                     {fmtArs(option.price)}
                   </span>
                 </button>
               ))}
 
               {matches.length === 0 && (
-                <p className="px-2 py-3 text-center text-[11px] text-muted">
+                <p className="px-2 py-3 text-center text-xs text-muted">
                   Sin resultados
                 </p>
               )}
@@ -514,7 +514,7 @@ export function SatConverterDialog({
               onClick={() => selectFiat(code)}
               aria-pressed={fiat === code}
               className={cn(
-                "h-6 rounded-md px-2 text-[11px] font-semibold transition-colors",
+                "h-6 rounded-md px-2 text-xs font-semibold transition-colors",
                 fiat === code
                   ? "bg-primary text-white shadow-sm"
                   : "text-muted hover:bg-white/20 hover:text-fg dark:hover:bg-white/5",
@@ -588,7 +588,7 @@ export function SatConverterDialog({
                 onSelect={onSourceChange}
               />
             )}
-            <p className="mt-2 text-[11px] text-muted">
+            <p className="mt-2 text-xs text-muted">
               1 BTC ={" "}
               <span className="font-medium text-fg">{fmtArs(btcArs)}</span>
               {fiat === "USD" && (

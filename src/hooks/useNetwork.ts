@@ -8,7 +8,9 @@ export function useFees() {
   return useQuery({
     queryKey: ["fees"],
     queryFn: ({ signal }) => fetchRecommendedFees(signal),
-    refetchInterval: 45_000,
+    // The WebSocket is the live source. This request only supplies data while
+    // the socket is connecting or recovering.
+    staleTime: Infinity,
   });
 }
 
@@ -23,7 +25,7 @@ export function useNetwork() {
   const height = useQuery({
     queryKey: ["tip-height"],
     queryFn: ({ signal }) => fetchTipHeight(signal),
-    refetchInterval: 120_000,
+    staleTime: Infinity,
   });
 
   const snapshot = useQuery({

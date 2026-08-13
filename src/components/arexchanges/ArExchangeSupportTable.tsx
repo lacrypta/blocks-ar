@@ -75,7 +75,7 @@ function FeatureRow({
         </span>
         <div>
           <p className="text-sm font-semibold text-fg">{feature.label}</p>
-          <p className="mt-1 text-[11px] text-muted">{feature.description}</p>
+          <p className="mt-1 text-xs text-muted">{feature.description}</p>
         </div>
       </div>
     </li>
@@ -144,7 +144,7 @@ function BitcoinerInfoModal({
           ))}
         </ul>
 
-        <p className="mt-4 text-[11px] text-muted">
+        <p className="mt-4 text-xs text-muted">
           El badge de cada exchange muestra el score total y, al pasar el mouse,
           detalla qué criterios suma y cuáles le faltan.
         </p>
@@ -212,9 +212,8 @@ export function ArExchangeSupportTable() {
   return (
     <Card>
       <CardTitle
-        id="exchanges"
         right={
-          <label className="flex items-center gap-1.5 text-[11px] text-muted">
+          <label className="flex items-center gap-1.5 text-xs text-muted">
             <input
               type="checkbox"
               checked={onlyLnAddress}
@@ -250,7 +249,7 @@ export function ArExchangeSupportTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-wide text-muted">
+            <tr className="text-left text-xs uppercase tracking-wide text-muted">
               <th className="py-2 pr-2 font-medium">Exchange</th>
               <th className="py-2 px-2 text-center font-medium">Nivel</th>
               <th className="py-2 px-2 text-center font-medium">BTC on-chain</th>
@@ -270,7 +269,7 @@ export function ArExchangeSupportTable() {
                     type="button"
                     onClick={() => setSelected(e)}
                     aria-haspopup="dialog"
-                    aria-label={`Ver detalle y fuente de precio de ${e.name}`}
+                    aria-label={`${e.name.charAt(0)} ${e.name} — ver detalle y fuente de precio`}
                     className="inline-flex items-center gap-2 rounded text-left outline-none ring-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <BrokerLogo brokerKey={e.criptoyaKey ?? e.key} />
@@ -291,7 +290,7 @@ export function ArExchangeSupportTable() {
                 <td className="py-2.5 px-2 text-center">
                   <YesNo ok={e.lightningAddressIn} />
                 </td>
-                <td className="py-2.5 pl-2 text-center text-[11px] text-muted">
+                <td className="py-2.5 pl-2 text-center text-xs text-muted">
                   {e.custodial ? "Custodial" : "No custodial"}
                 </td>
               </tr>
@@ -307,7 +306,7 @@ export function ArExchangeSupportTable() {
         </table>
       </div>
 
-      <p className="mt-3 text-[11px] text-muted">
+      <p className="mt-3 text-xs text-muted">
         ⚠️ Datos informativos, a verificar con cada plataforma — el soporte de
         Lightning cambia seguido.
       </p>
@@ -315,7 +314,7 @@ export function ArExchangeSupportTable() {
         href={AR_EXCHANGES_GITHUB_EDIT_URL}
         target="_blank"
         rel="noreferrer"
-        className="mt-1 inline-flex text-[11px] font-medium text-primary hover:underline"
+        className="mt-1 inline-flex text-xs font-medium text-primary hover:underline"
       >
         Editar JSON en GitHub
       </a>

@@ -25,6 +25,7 @@ export interface DollarRates {
 }
 
 type Raw = Record<string, unknown>;
+const AGGREGATE_TIMEOUT_MS = 4_000;
 
 const mid = (ask?: number, bid?: number) => {
   if (typeof ask === "number" && typeof bid === "number") return (ask + bid) / 2;
@@ -141,41 +142,50 @@ export async function fetchBrokers(
   signal?: AbortSignal,
   init?: RequestInit,
 ): Promise<BrokerQuote[]> {
-  const [res, official] = await Promise.all([
+  const aggregateSignal = signal
+    ? AbortSignal.any([signal, AbortSignal.timeout(AGGREGATE_TIMEOUT_MS)])
+    : AbortSignal.timeout(AGGREGATE_TIMEOUT_MS);
+  const [aggregateResult, officialResult] = await Promise.allSettled([
     fetch(`https://criptoya.com/api/btc/ars/${volume}`, {
       ...init,
-      signal,
+      signal: aggregateSignal,
     }),
     fetchOfficialQuotes(signal),
   ]);
-  if (!res.ok) throw new Error(`CriptoYa brokers ${res.status}`);
-  const j = (await res.json()) as Record<string, RawBroker>;
 
   const quotes: BrokerQuote[] = [];
-  for (const [key, v] of Object.entries(j)) {
-    const totalAsk = v.totalAsk ?? v.ask ?? 0;
-    const totalBid = v.totalBid ?? v.bid ?? 0;
-    // Keep a broker if it quotes at least ONE usable side. Many P2P brokers
-    // quote only buy or only sell; each column filters its own side, so
-    // dropping the whole row would make one-sided brokers vanish from the
-    // ranking they legitimately belong in.
-    if (totalAsk <= 0 && totalBid <= 0) continue;
-    const spread =
-      totalAsk > 0 && totalBid > 0 ? (totalAsk - totalBid) / totalBid : NaN;
-    quotes.push({
-      key,
-      totalAsk,
-      totalBid,
-      ask: v.ask ?? totalAsk,
-      bid: v.bid ?? totalBid,
-      spread,
-      time: v.time ?? Date.now(),
-    });
+  if (aggregateResult.status === "fulfilled" && aggregateResult.value.ok) {
+    const data = (await aggregateResult.value.json()) as Record<
+      string,
+      RawBroker
+    >;
+    for (const [key, v] of Object.entries(data)) {
+      const totalAsk = v.totalAsk ?? v.ask ?? 0;
+      const totalBid = v.totalBid ?? v.bid ?? 0;
+      // Keep a broker if it quotes at least ONE usable side. Many P2P brokers
+      // quote only buy or only sell; each column filters its own side, so
+      // dropping the whole row would make one-sided brokers vanish from the
+      // ranking they legitimately belong in.
+      if (totalAsk <= 0 && totalBid <= 0) continue;
+      const spread =
+        totalAsk > 0 && totalBid > 0 ? (totalAsk - totalBid) / totalBid : NaN;
+      quotes.push({
+        key,
+        totalAsk,
+        totalBid,
+        ask: v.ask ?? totalAsk,
+        bid: v.bid ?? totalBid,
+        spread,
+        time: v.time ?? Date.now(),
+      });
+    }
   }
 
   // An official feed always wins over the aggregate for its own row, but we
   // keep CriptoYa's reading alongside it so the detail dialog can still show
   // the comparison. Exchanges with no CriptoYa row (Bull Bitcoin) just join.
+  const official =
+    officialResult.status === "fulfilled" ? officialResult.value : [];
   for (const quote of official) {
     if (quote.totalAsk <= 0 && quote.totalBid <= 0) continue;
     const at = quotes.findIndex((q) => q.key === quote.key);
@@ -187,6 +197,10 @@ export async function fetchBrokers(
         aggregate: { ...quotes[at], provider: "aggregator" },
       };
     }
+  }
+
+  if (quotes.length === 0 && aggregateResult.status === "rejected") {
+    throw aggregateResult.reason;
   }
 
   return quotes;

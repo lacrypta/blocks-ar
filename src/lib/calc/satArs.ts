@@ -3,6 +3,10 @@ export const SATS_PER_BTC = 100_000_000;
 /** Value of 1 satoshi in ARS given the BTC price in ARS. */
 export const satToArs = (btcArs: number) => btcArs / SATS_PER_BTC;
 
+/** ARS value of a satoshi amount at the supplied BTC/ARS price. */
+export const satsToArs = (sats: number, btcArs: number) =>
+  sats * satToArs(btcArs);
+
 /**
  * Progress toward the historic "1 SAT = 1 ARS" parity.
  * Equals `satToArs` numerically: reaches 1.0 when 1 BTC = 100.000.000 ARS.

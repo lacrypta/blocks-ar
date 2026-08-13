@@ -151,7 +151,7 @@ export function SatParityHero() {
               style={{ width: `${barPct}%` }}
             />
           </div>
-          <div className="mt-2 text-xs text-muted">
+          <div className="mt-2 min-h-12 text-xs text-muted">
             {remainingPct !== undefined ? (
               <>
                 {hasReachedFirstPeso && (
