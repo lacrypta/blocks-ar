@@ -21,6 +21,12 @@ current fiat-transfer fee. Set `WAPU_API_KEY` to a WapuPay API token to source
 the final price directly from its authenticated direct-fiat quote endpoint. The
 token is only read by the server-side official-feed adapter.
 
+The optional merchant profiles integration uses Google Places for ratings and
+photos. Set `GOOGLE_PLACES_API_KEY` to a server-side Google Maps Platform key
+with Places API (New) enabled and billing configured. Without it, profiles keep
+working with BTC Map data and omit Google content. Never expose this key with a
+`NEXT_PUBLIC_` prefix.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

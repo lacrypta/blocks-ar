@@ -1,8 +1,12 @@
-import sharp from "sharp";
+import { createRequire } from "node:module";
 import { fetchBrokers, fetchDolar } from "@/lib/api/criptoya";
 import { satToArs } from "@/lib/calc/satArs";
 import { median } from "@/lib/calc/stats";
 import { fmtArs, fmtSatArs, fmtUsd } from "@/lib/format";
+
+// sharp 0.35's ESM entry imports package.json and warns on Node 20.
+// Its supported CommonJS export avoids the warning without changing behavior.
+const sharp = createRequire(import.meta.url)("sharp") as (typeof import("sharp"))["default"];
 
 export const SOCIAL_IMAGE_REVALIDATE = 1800;
 export const socialImageAlt =
