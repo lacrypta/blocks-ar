@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useBtcArs } from "@/hooks/useBtcArs";
 import { satToArs } from "@/lib/calc/satArs";
 import { SatSymbol } from "@/components/icons/SatSymbol";
@@ -11,12 +12,12 @@ import { WidgetEditButton } from "@/components/widgets/WidgetEditButton";
 import { useWidgetLayout } from "@/store/useWidgetLayout";
 
 const NAV_BY_WIDGET: Record<string, { href: string; label: string }> = {
-  paridad: { href: "#paridad", label: "Paridad" },
-  precio: { href: "#precio", label: "Precio" },
-  dolares: { href: "#dolares", label: "Dólares" },
-  red: { href: "#red", label: "Red" },
-  brokers: { href: "#brokers", label: "Brokers" },
-  "exchanges-ar": { href: "#exchanges", label: "Exchanges" },
+  paridad: { href: "/#paridad", label: "Paridad" },
+  precio: { href: "/#precio", label: "Precio" },
+  dolares: { href: "/#dolares", label: "Dólares" },
+  red: { href: "/#red", label: "Red" },
+  brokers: { href: "/#brokers", label: "Brokers" },
+  "exchanges-ar": { href: "/#exchanges", label: "Exchanges" },
 };
 
 const HEADER_SAT_ARS = new Intl.NumberFormat("es-AR", {
@@ -25,6 +26,8 @@ const HEADER_SAT_ARS = new Intl.NumberFormat("es-AR", {
 });
 
 export function Header() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const { value: btcArs } = useBtcArs();
   const { order, hidden } = useWidgetLayout();
   const satArs =
@@ -34,15 +37,17 @@ export function Header() {
       ? HEADER_SAT_ARS.format(satArs)
       : "—";
   const hiddenSet = new Set(hidden);
-  const navItems = order
-    .filter((id) => NAV_BY_WIDGET[id] && !hiddenSet.has(id))
-    .map((id) => NAV_BY_WIDGET[id]);
+  const navItems = isHome
+    ? order
+        .filter((id) => NAV_BY_WIDGET[id] && !hiddenSet.has(id))
+        .map((id) => NAV_BY_WIDGET[id])
+    : [];
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/15 bg-bg/60 backdrop-blur-xl dark:border-white/8">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6">
         <Link href="/">
-          <BrandLogo />
+          <BrandLogo className="max-[430px]:[&>span:last-child]:hidden" />
         </Link>
 
         <nav className="ml-4 hidden items-center gap-1 md:flex">
@@ -58,6 +63,16 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
+          <Link
+            href="/comercios"
+            aria-current={pathname.startsWith("/comercios") ? "page" : undefined}
+            aria-label="Comercios"
+            title="Comercios"
+            className="glass-pill inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium text-muted transition-colors hover:text-fg aria-[current=page]:border-bitcoin/50 aria-[current=page]:text-bitcoin"
+          >
+            <StorefrontIcon className="h-4 w-4" />
+            <span className="hidden lg:inline">Comercios</span>
+          </Link>
           <MempoolFeeBadge />
           <a
             href="https://1satoshi1peso.ar/ARS"
@@ -77,10 +92,29 @@ export function Header() {
             <span className="font-semibold text-fg">{satArsLabel}</span>
             <span>ARS</span>
           </a>
-          <WidgetEditButton />
+          {isHome && <WidgetEditButton />}
           <ThemeToggle />
         </div>
       </div>
     </header>
+  );
+}
+
+function StorefrontIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M3 9 5 3h14l2 6" />
+      <path d="M5 13v8h14v-8M9 21v-6h6v6" />
+      <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+    </svg>
   );
 }
